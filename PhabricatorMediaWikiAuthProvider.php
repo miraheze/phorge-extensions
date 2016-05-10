@@ -58,9 +58,6 @@ final class PhabricatorMediaWikiAuthProvider
     $uri = $config->getProperty(self::PROPERTY_MEDIAWIKI_URI);
     $uri = new PhutilURI($uri);
     $normalized = $uri->getProtocol().'://'.$uri->getDomain();
-    if ($uri->getPort() != 80 && $uri->getPort() != 443) {
-      $normalized .= ':'.$uri->getPort();
-    }
     if (strlen(($uri->getPath())) > 0 && $uri->getPath() !== '/') {
       $normalized .= $uri->getPath();
     }
