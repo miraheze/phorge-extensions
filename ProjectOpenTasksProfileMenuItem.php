@@ -1,4 +1,3 @@
-
 <?php
 final class ProjectOpenTasksProfileMenuItem
   extends PhabricatorProfileMenuItem {
