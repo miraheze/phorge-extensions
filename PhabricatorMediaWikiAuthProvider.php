@@ -1,5 +1,7 @@
 <?php
 
+// Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/oauth/PhabricatorMediaWikiAuthProvider.php
+
 final class PhabricatorMediaWikiAuthProvider
   extends PhabricatorOAuth1AuthProvider {
 
