@@ -1,5 +1,7 @@
 <?php
 
+// Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/oauth/PhutilMediaWikiAuthAdapter.php
+
 /**
  * Authentication adapter for MediaWiki OAuth1.
  */
