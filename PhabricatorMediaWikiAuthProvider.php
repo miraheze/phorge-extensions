@@ -1,7 +1,5 @@
 <?php
 
-// Source: https://github.com/wikimedia/phabricator-extensions/blob/master/src/PhabricatorMediaWikiAuthProvider.php
-
 final class PhabricatorMediaWikiAuthProvider
   extends PhabricatorOAuth1AuthProvider {
 
@@ -58,6 +56,9 @@ final class PhabricatorMediaWikiAuthProvider
     $uri = $config->getProperty(self::PROPERTY_MEDIAWIKI_URI);
     $uri = new PhutilURI($uri);
     $normalized = $uri->getProtocol().'://'.$uri->getDomain();
+    if ($uri->getPort() != 80 && $uri->getPort() != 443) {
+      $normalized .= ':'.$uri->getPort();
+    }
     if (strlen(($uri->getPath())) > 0 && $uri->getPath() !== '/') {
       $normalized .= $uri->getPath();
     }
@@ -266,4 +267,16 @@ final class PhabricatorMediaWikiAuthProvider
     return null;
   }
 
+  protected function getContentSecurityPolicyFormActions() {
+
+    $csp_actions = $this->getAdapter()->getContentSecurityPolicyFormActions();
+    $uri = new phutilURI($csp_actions[0]);
+    $mobile_uri = new phutilURI($uri);
+    $domain = preg_replace('/^www\./', 'm.', $uri->getDomain());
+    $mobile_uri->setDomain($domain);
+    if ((string)$uri != (string)$mobile_uri) {
+      $csp_actions[] = (string)$mobile_uri;
+    }
+    return $csp_actions;
+  }
 }
