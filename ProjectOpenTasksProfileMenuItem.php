@@ -1,5 +1,7 @@
 <?php
 
+// Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/panel/ProjectOpenTasksProfileMenuItem.php
+
 final class ProjectOpenTasksProfileMenuItem
   extends PhabricatorProfileMenuItem {
 
