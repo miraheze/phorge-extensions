@@ -12,54 +12,54 @@ final class ProjectOpenTasksProfileMenuItem
   }
 
   public function getDefaultName() {
-    return pht('Open Tasks');
+    return pht( 'Open Tasks' );
   }
 
   public function getMenuItemTypeName() {
-    return pht('Link to Open Tasks');
+    return pht( 'Link to Open Tasks' );
   }
 
   public function canHideMenuItem(
-    PhabricatorProfileMenuItemConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config ) {
     return true;
   }
 
   public function canMakeDefault(
-    PhabricatorProfileMenuItemConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config ) {
     return false;
   }
 
   public function getDisplayName(
-    PhabricatorProfileMenuItemConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config ) {
     return $this->getDefaultName();
   }
 
   protected function newMenuItemViewList(
-    PhabricatorProfileMenuItemConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config ) {
 
     $object = $config->getProfileObject();
 
-    $uri = '/maniphest/?project='.$object->getPHID().'&statuses=open()&group=none&order=newest#R';
+    $uri = '/maniphest/?project=' . $object->getPHID() . '&statuses=open()&group=none&order=newest#R';
 
     $item = $this->newItemView()
-      ->setURI($uri)
-      ->setName($this->getDisplayName($config))
-      ->setIcon('fa-anchor');
+      ->setURI( $uri )
+      ->setName( $this->getDisplayName( $config ) )
+      ->setIcon( 'fa-anchor' );
 
-    return array(
+    return [
       $item,
-    );
+    ];
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return array(
-      id(new PhabricatorInstructionsEditField())
+    PhabricatorProfileMenuItemConfiguration $config ) {
+    return [
+      id( new PhabricatorInstructionsEditField() )
         ->setValue(
           pht(
             'This adds a link to search maniphest for open tasks which are '.
-            "tagged with this project.\n\n")),
-    );
+            "tagged with this project.\n\n" ) ),
+    ];
   }
 
 }
