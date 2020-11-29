@@ -12,35 +12,35 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
   }
 
   public function getFieldName() {
-    return pht("GitHub User");
+    return pht( "GitHub User" );
   }
 
   public function getFieldValue() {
     $account = $this->getExternalAccount();
 
-    if (! $account || !strlen($account->getAccountURI())) {
+    if ( !$account || !strlen( $account->getAccountURI() ) ) {
       return null;
     }
 
-    $uri = urldecode($account->getAccountURI());
+    $uri = urldecode( $account->getAccountURI() );
 
     // Split on the User: part of the userpage uri
-    $name = explode("github.com/",$uri);
+    $name = explode( "github.com/", $uri );
     // grab the part after User:
-    $name = array_pop($name);
+    $name = array_pop( $name );
     // decode for display:
-    $name = urldecode(rawurldecode($name));
+    $name = urldecode( rawurldecode( $name ) );
 
     return $name;
   }
 
   protected function getExternalAccount() {
-    if (!$this->externalAccount) {
+    if ( !$this->externalAccount ) {
       $user = $this->getObject();
-      $this->externalAccount = id(new PhabricatorExternalAccount())->loadOneWhere(
+      $this->externalAccount = id( new PhabricatorExternalAccount() )->loadOneWhere(
         'userPHID = %s AND accountType = %s',
         $user->getPHID(),
-        'github');
+        'github' );
     }
     return $this->externalAccount;
   }
@@ -53,29 +53,29 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
     return $this->getFieldName();
   }
 
-  public function renderPropertyViewValue(array $handles) {
+  public function renderPropertyViewValue( array $handles ) {
 
     $account = $this->getExternalAccount();
 
-    if (! $account || !strlen($account->getAccountURI())) {
-      return pht('Unknown');
+    if ( !$account || !strlen( $account->getAccountURI() ) ) {
+      return pht( 'Unknown' );
     }
 
-    $uri = urldecode($account->getAccountURI());
+    $uri = urldecode( $account->getAccountURI() );
 
     // Split on the User: part of the userpage uri
-    $name = explode("github.com/",$uri);
+    $name = explode( "github.com/", $uri );
     // grab the part after User:
-    $name = array_pop($name);
+    $name = array_pop( $name );
     // decode for display:
-    $name = urldecode(rawurldecode($name));
+    $name = urldecode( rawurldecode( $name ) );
 
     return phutil_tag(
       'a',
-      array(
+      [
         'href' => $uri
-      ),
-      $name);
+      ],
+      $name );
   }
 
 
@@ -89,16 +89,16 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
   }
 
   public function buildFieldIndexes() {
-    $indexes = array();
+    $indexes = [];
 
     $value = $this->getFieldValue();
-    if (strlen($value)) {
-      $indexes[] = $this->newStringIndex($value);
-      $indexes[] = $this->newStringIndex(urldecode($this->getExternalAccount()->getAccountURI()));
-      $parts = explode(' ',$value);
-      if (count($parts) > 1) {
-        foreach($parts as $part) {
-          $indexes[] = $this->newStringIndex($part);
+    if ( strlen( $value ) ) {
+      $indexes[] = $this->newStringIndex( $value );
+      $indexes[] = $this->newStringIndex( urldecode( $this->getExternalAccount()->getAccountURI() ) );
+      $parts = explode( ' ', $value );
+      if ( count( $parts ) > 1 ) {
+        foreach( $parts as $part ) {
+          $indexes[] = $this->newStringIndex( $part );
         }
       }
     }
@@ -108,33 +108,33 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
   public function readApplicationSearchValueFromRequest(
     PhabricatorApplicationSearchEngine $engine,
-    AphrontRequest $request) {
+    AphrontRequest $request ) {
 
-    return $request->getStr($this->getFieldKey());
+    return $request->getStr( $this->getFieldKey() );
   }
 
   public function applyApplicationSearchConstraintToQuery(
     PhabricatorApplicationSearchEngine $engine,
     PhabricatorCursorPagedPolicyAwareQuery $query,
-    $value) {
+    $value ) {
 
-    if (strlen($value)) {
+    if ( strlen( $value ) ) {
       $query->withApplicationSearchContainsConstraint(
-        $this->newStringIndex(null),
-        $value);
+        $this->newStringIndex( null ),
+        $value );
     }
   }
 
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value) {
+    $value ) {
 
     $form->appendChild(
-      id(new AphrontFormTextControl())
-        ->setLabel($this->getFieldName())
-        ->setName($this->getFieldKey())
-        ->setValue($value));
+      id( new AphrontFormTextControl() )
+        ->setLabel( $this->getFieldName() )
+        ->setName( $this->getFieldKey() )
+        ->setValue( $value ) );
   }
 
   protected function newStringIndexStorage() {
