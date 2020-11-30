@@ -118,6 +118,7 @@ final class PhutilMediaWikiAuthAdapter
       list( $body ) = $this->newOAuth1Future( $uri )
         ->setMethod( 'GET' )
         ->setNonce( $nonce )
+        ->addHeader( 'User-Agent', __CLASS__ )
         ->resolvex();
       $this->userinfo = $this->decodeAndVerifyJWT( $body, $nonce );
     }
