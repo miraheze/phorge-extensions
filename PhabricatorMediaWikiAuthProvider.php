@@ -253,7 +253,7 @@ final class PhabricatorMediaWikiAuthProvider
       ->appendChild(
         id( new AphrontFormTextControl() )
           ->setLabel( pht( 'Secret Key' ) )
-          ->setName( self::PROPERTY_CONSUMER_SECRETb)
+          ->setName( self::PROPERTY_CONSUMER_SECRET )
           ->setValue( $values[self::PROPERTY_CONSUMER_SECRET] ) );
     }
   }
