@@ -250,7 +250,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 				->setError( $e_uri )
 		);
 
-		if (!$is_setup) {
+		if ( !$is_setup ) {
 			if ( !strlen( $config->getProperty( self::PROPERTY_CONSUMER_KEY ) ) ) {
 				$form->appendRemarkupInstructions(
 					pht(
