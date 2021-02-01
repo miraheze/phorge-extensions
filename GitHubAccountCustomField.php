@@ -17,7 +17,6 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 	public function getFieldValue() {
 		$account = $this->getExternalAccount();
-
 		if ( !$account || !strlen( $account->getAccountURI() ) ) {
 			return null;
 		}
@@ -40,8 +39,10 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 			$this->externalAccount = id( new PhabricatorExternalAccount() )->loadOneWhere(
 				'userPHID = %s AND accountType = %s',
 				$user->getPHID(),
-				'github' );
+				'github'
+			);
 		}
+
 		return $this->externalAccount;
 	}
 
@@ -54,7 +55,6 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 	}
 
 	public function renderPropertyViewValue( array $handles ) {
-
 		$account = $this->getExternalAccount();
 
 		if ( !$account || !strlen( $account->getAccountURI() ) ) {
@@ -78,11 +78,9 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 			$name );
 	}
 
-
 	public function shouldAppearInApplicationSearch() {
 		return true;
 	}
-
 
 	public function getFieldType() {
 		return 'text';
@@ -108,37 +106,38 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 	public function readApplicationSearchValueFromRequest(
 		PhabricatorApplicationSearchEngine $engine,
-		AphrontRequest $request ) {
-
+		AphrontRequest $request
+	) {
 		return $request->getStr( $this->getFieldKey() );
 	}
 
 	public function applyApplicationSearchConstraintToQuery(
 		PhabricatorApplicationSearchEngine $engine,
 		PhabricatorCursorPagedPolicyAwareQuery $query,
-		$value ) {
-
+		$value
+	) {
 		if ( strlen( $value ) ) {
 			$query->withApplicationSearchContainsConstraint(
 				$this->newStringIndex( null ),
-				$value );
+				$value
+			);
 		}
 	}
 
 	public function appendToApplicationSearchForm(
 		PhabricatorApplicationSearchEngine $engine,
 		AphrontFormView $form,
-		$value ) {
-
+		$value
+	) {
 		$form->appendChild(
 			id( new AphrontFormTextControl() )
 				->setLabel( $this->getFieldName() )
 				->setName( $this->getFieldKey() )
-				->setValue( $value ) );
+				->setValue( $value )
+		);
 	}
 
 	protected function newStringIndexStorage() {
 		return new PhabricatorUserCustomFieldStringIndex();
 	}
-
 }
