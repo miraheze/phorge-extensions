@@ -17,6 +17,7 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 	public function getFieldValue() {
 		$account = $this->getExternalAccount();
+
 		if ( !$account || !strlen( $account->getAccountURI() ) ) {
 			return null;
 		}
@@ -75,7 +76,8 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 			[
 				'href' => $uri
 			],
-			$name );
+			$name
+		);
 	}
 
 	public function shouldAppearInApplicationSearch() {
@@ -90,10 +92,12 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 		$indexes = [];
 
 		$value = $this->getFieldValue();
+
 		if ( strlen( $value ) ) {
 			$indexes[] = $this->newStringIndex( $value );
 			$indexes[] = $this->newStringIndex( urldecode( $this->getExternalAccount()->getAccountURI() ) );
 			$parts = explode( ' ', $value );
+
 			if ( count( $parts ) > 1 ) {
 				foreach( $parts as $part ) {
 					$indexes[] = $this->newStringIndex( $part );
