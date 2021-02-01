@@ -3,7 +3,6 @@
 // Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/oauth/PhabricatorMediaWikiAuthProvider.php
 
 final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvider {
-
 	const PROPERTY_MEDIAWIKI_NAME = 'oauth1:mediawiki:name';
 	const PROPERTY_MEDIAWIKI_URI = 'oauth1:mediawiki:uri';
 	const PROPERTY_PRIVATE_KEY = 'oauth1:mediawiki:key:private';
@@ -33,6 +32,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 
 	public function readFormValuesFromRequest( AphrontRequest $request ) {
 		$is_setup = $this->isSetup();
+
 		if ( $is_setup ) {
 			$name = $request->getStr( self::PROPERTY_MEDIAWIKI_NAME );
 		} else {
