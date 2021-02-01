@@ -58,7 +58,7 @@ final class ProjectOpenTasksProfileMenuItem extends PhabricatorProfileMenuItem {
 		return [
 			id( new PhabricatorInstructionsEditField() )->setValue(
 				pht(
-					'This adds a link to search maniphest for open tasks which are '.
+					'This adds a link to search maniphest for open tasks which are ' .
 					"tagged with this project.\n\n"
 				)
 			),
