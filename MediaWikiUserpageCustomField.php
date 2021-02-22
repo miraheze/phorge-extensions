@@ -73,7 +73,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 		// decode for display:
 		$name = urldecode( rawurldecode( $rawname ) );
 		$accounts_uri = [ 'href' =>
-				"https://meta.miraheze.org/wiki/Special:CentralAuth?target=" .
+				"https://meta.miraheze.org/wiki/Special:CentralAuth/" .
 				$rawname ];
 		$accounts_text = pht( 'Global Accounts' );
 		$userpage_uri = [ 'href' => $userpage_uri ];
