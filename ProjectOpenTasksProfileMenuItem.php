@@ -14,9 +14,9 @@ final class ProjectOpenTasksProfileMenuItem extends PhabricatorProfileMenuItem {
 	}
 
 	public function canAddToObject(
-		PhabricatorProfileMenuItemConfiguration $config
+		$object
 	) {
-		return true;
+		return ($object instanceof PhabricatorProject);
 	}
 
 	public function getDisplayName(
