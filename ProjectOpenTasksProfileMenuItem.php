@@ -9,30 +9,20 @@ final class ProjectOpenTasksProfileMenuItem extends PhabricatorProfileMenuItem {
 		return 'fa-anchor';
 	}
 
-	public function getDefaultName() {
-		return pht( 'Open Tasks' );
-	}
-
 	public function getMenuItemTypeName() {
 		return pht( 'Link to Open Tasks' );
 	}
 
-	public function canHideMenuItem(
+	public function canAddToObject(
 		PhabricatorProfileMenuItemConfiguration $config
 	) {
 		return true;
 	}
 
-	public function canMakeDefault(
-		PhabricatorProfileMenuItemConfiguration $config
-	) {
-		return false;
-	}
-
 	public function getDisplayName(
 		PhabricatorProfileMenuItemConfiguration $config
 	) {
-		return $this->getDefaultName();
+		return pht( 'Open Tasks' );
 	}
 
 	protected function newMenuItemViewList(
