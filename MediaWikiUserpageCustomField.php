@@ -103,7 +103,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 			$indexes[] = $this->newStringIndex( urldecode( $this->getExternalAccount()->getAccountURI() ) );
 			$parts = explode( ' ', $value );
 			if ( count( $parts ) > 1 ) {
-				foreach( $parts as $part ) {
+				foreach ( $parts as $part ) {
 					$indexes[] = $this->newStringIndex( $part );
 				}
 			}
