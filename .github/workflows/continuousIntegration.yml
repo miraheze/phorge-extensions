@@ -30,7 +30,7 @@ jobs:
 
     # Only patch code when it is a push event
     - name: Push the changes
-#      if: github.event_name == 'push'
+      if: github.event_name == 'push'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -38,7 +38,7 @@ jobs:
         git config --global user.email "github-actions@users.noreply.github.com"
         git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git add .
-        git commit -am "CI: lint code to MediaWiki standards" -m "Check commit and GitHub actions for more details" || echo "No changes to commit"
+        git commit -am "CI: lint code" -m "Check commit and GitHub actions for more details" || echo "No changes to commit"
         git pull --rebase
         git push
 
