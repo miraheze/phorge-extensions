@@ -99,7 +99,7 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 			$parts = explode( ' ', $value );
 
 			if ( count( $parts ) > 1 ) {
-				foreach( $parts as $part ) {
+				foreach ( $parts as $part ) {
 					$indexes[] = $this->newStringIndex( $part );
 				}
 			}

@@ -114,7 +114,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 	public function getClientRedirectURI() {
 		$p = parent::getClientRedirectURI();
 
-		return $p. "&oauth_consumer_key={$this->getConsumerKey()}";
+		return $p . "&oauth_consumer_key={$this->getConsumerKey()}";
 	}
 
 	protected function getValidateTokenURI() {
@@ -243,10 +243,10 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 	/** return true if hash1 has the same value as hash2 */
 	private function compareHash( $hash1, $hash2 ) {
 		$result = strlen( $hash1 ) ^ strlen( $hash2 );
-		$len = min( strlen( $hash1 ), strlen( $hash2) );
+		$len = min( strlen( $hash1 ), strlen( $hash2 ) );
 
 		for ( $i = 0; $i < $len; $i++ ) {
-				$result |= ord( $hash1{$i} ) ^ ord( $hash2{$i} );
+				$result |= ord( $hash1[$i] ) ^ ord( $hash2[$i] );
 		}
 
 		// this is just a constant time compare of the two hash strings
