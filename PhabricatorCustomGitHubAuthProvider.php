@@ -29,7 +29,7 @@ final class PhabricatorCustomGitHubAuthProvider
   }
 
   protected function newOAuthAdapter() {
-	return new PhutilGitHubAuthAdapter();
+	return new PhutilCustomGitHubAuthAdapter();
   }
 
   protected function getLoginIcon() {
