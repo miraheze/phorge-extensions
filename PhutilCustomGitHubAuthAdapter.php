@@ -6,7 +6,7 @@
 final class PhutilCustomGitHubAuthAdapter extends PhutilOAuthAuthAdapter {
 
   public function getAdapterType() {
-	return 'github';
+	return 'github custom';
   }
 
   public function getAdapterDomain() {
@@ -53,7 +53,7 @@ final class PhutilCustomGitHubAuthAdapter extends PhutilOAuthAuthAdapter {
 	$uri = new PhutilURI( 'https://api.github.com/user' );
 
 	$future = new HTTPSFuture( $uri );
-	$future->addCURLOption( CURLOPT_PROXY, 'bast101.miraheze.org' );
+	$future->addCURLOption( CURLOPT_PROXY, 'bast.miraheze.org' );
 	$future->addCURLOption( CURLOPT_PROXYPORT, '443' );
 	$future->addCURLOption( CURLOPT_PROXYTYPE, 'HTTP' );
 
