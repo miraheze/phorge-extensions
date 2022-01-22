@@ -4,7 +4,7 @@ final class PhabricatorCustomGitHubAuthProvider
   extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
-	return pht( 'GitHub' );
+	return pht( 'Custom GitHub' );
   }
 
   protected function getProviderConfigurationHelp() {
