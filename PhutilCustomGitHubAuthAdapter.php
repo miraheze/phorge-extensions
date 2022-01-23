@@ -6,7 +6,7 @@
 final class PhutilCustomGitHubAuthAdapter extends PhutilOAuthAuthAdapter {
 
   public function getAdapterType() {
-	return 'github custom';
+	return 'customgithub';
   }
 
   public function getAdapterDomain() {
