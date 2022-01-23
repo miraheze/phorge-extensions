@@ -35,10 +35,4 @@ final class PhabricatorCustomGitHubAuthProvider
   protected function getLoginIcon() {
 	return 'Github';
   }
-
-  public function getLoginURI() {
-	// TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
-	return '/oauth/github/login/';
-  }
-
 }
