@@ -1,10 +1,10 @@
 name: Continuous integration
 
 on:
-  create:
   push:
+    branches: [ master ]
   pull_request:
-    types: [opened, synchronize]
+    branches: [ master ]
 
 jobs:
   test:
