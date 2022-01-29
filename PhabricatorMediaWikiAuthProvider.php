@@ -3,16 +3,16 @@
 // Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/oauth/PhabricatorMediaWikiAuthProvider.php
 
 final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvider {
-	const PROPERTY_MEDIAWIKI_NAME = 'oauth1:mediawiki:name';
-	const PROPERTY_MEDIAWIKI_URI = 'oauth1:mediawiki:uri';
-	const PROPERTY_PRIVATE_KEY = 'oauth1:mediawiki:key:private';
-	const PROPERTY_PUBLIC_KEY = 'oauth1:mediawiki:key:public';
+	public const PROPERTY_MEDIAWIKI_NAME = 'oauth1:mediawiki:name';
+	public const PROPERTY_MEDIAWIKI_URI = 'oauth1:mediawiki:uri';
+	public const PROPERTY_PRIVATE_KEY = 'oauth1:mediawiki:key:private';
+	public const PROPERTY_PUBLIC_KEY = 'oauth1:mediawiki:key:public';
 
 	public function getProviderConfig() {
-			$config = parent::getProviderConfig();
-			$config->setProviderType( 'mediawiki' );
+		$config = parent::getProviderConfig();
+		$config->setProviderType( 'mediawiki' );
 
-			return $config;
+		return $config;
 	}
 
 	public function readFormValuesFromProvider() {

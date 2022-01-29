@@ -3,7 +3,7 @@
 // Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/panel/ProjectOpenTasksProfileMenuItem.php
 
 final class ProjectOpenTasksProfileMenuItem extends PhabricatorProfileMenuItem {
-	const MENUITEMKEY = 'custom.open-tasks';
+	public const MENUITEMKEY = 'custom.open-tasks';
 
 	public function getMenuItemTypeIcon() {
 		return 'fa-anchor';
