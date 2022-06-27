@@ -1,5 +1,4 @@
 name: Continuous integration
-
 on:
   push:
     branches: [ master ]
@@ -33,7 +32,7 @@ jobs:
 
     - name: Push the changes
       continue-on-error: true
-      if: github.event_name == 'push'
+      if: github.event_name == 'pull_request'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
