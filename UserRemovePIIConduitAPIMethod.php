@@ -54,6 +54,24 @@ final class UserRemovePIIConduitAPIMethod extends UserConduitAPIMethod {
 				);
 		}
 
+		$keys = id( new PhabricatorAuthSSHKeyQuery() )
+			->setViewer( $actor )
+			->withObjectPHIDs( [ $targetUser->getPHID() ] )
+			->execute();
+
+		foreach ( $keys as $key ) {
+			$engine->destroyObject( $key );
+		}
+
+		$emails = id( new PhabricatorUserEmail() )->loadAllWhere(
+			'userPHID = %s',
+			$targetUser->getPHID()
+		);
+
+		foreach ( $emails as $email ) {
+			$engine->destroyObject( $email );
+		}
+
 		id( new PhabricatorUserEditor() )
 			->setActor( $actor )
 			->disableUser( $targetUser, true );
