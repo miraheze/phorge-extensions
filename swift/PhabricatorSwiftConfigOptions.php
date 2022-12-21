@@ -37,7 +37,7 @@ final class PhabricatorSwiftConfigOptions extends PhabricatorApplicationConfigOp
 
 			$this->newOption( 'storage.swift.endpoint', 'string', null )
 				->setDescription( pht( 'The hostname of the swift cluster frontend.' ) )
-				->addExample( 'https://ms-fe01', pht( 'MediaStorage FrontEnd 01' ) ),
+				->addExample( 'https://swift-lb.miraheze.org', pht( 'Swift Load Balancer' ) ),
 		];
 	}
 }
