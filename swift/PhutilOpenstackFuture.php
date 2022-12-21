@@ -10,138 +10,138 @@ abstract class PhutilOpenstackFuture extends FutureProxy {
   private $path = '/';
   private $endpoint;
   private $data = '';
-  private $headers = array();
+  private $headers = [];
 
   abstract public function getServiceName();
 
   public function __construct() {
-    parent::__construct(null);
+	parent::__construct( null );
   }
 
-  public function setAccount($account) {
-    $this->account = $account;
-    return $this;
+  public function setAccount( $account ) {
+	$this->account = $account;
+	return $this;
   }
 
   public function getAccount() {
-    return $this->account;
+	return $this->account;
   }
 
-  public function setSecretKey(PhutilOpaqueEnvelope $secret_key) {
-    $this->secretKey = $secret_key;
-    return $this;
+  public function setSecretKey( PhutilOpaqueEnvelope $secret_key ) {
+	$this->secretKey = $secret_key;
+	return $this;
   }
 
   public function getSecretKey() {
-    return $this->secretKey;
+	return $this->secretKey;
   }
 
-  public function setEndpoint($endpoint) {
-    $this->endpoint = $endpoint;
-    return $this;
+  public function setEndpoint( $endpoint ) {
+	$this->endpoint = $endpoint;
+	return $this;
   }
 
   public function getEndpoint() {
-    return $this->endpoint;
+	return $this->endpoint;
   }
 
-  public function setHTTPMethod($method) {
-    $this->httpMethod = $method;
-    return $this;
+  public function setHTTPMethod( $method ) {
+	$this->httpMethod = $method;
+	return $this;
   }
 
   public function getHTTPMethod() {
-    return $this->httpMethod;
+	return $this->httpMethod;
   }
 
-  public function setPath($path) {
-    $account = $this->getAccount();
-    $this->path = "v1/$account/$path";
-    return $this;
+  public function setPath( $path ) {
+	$account = $this->getAccount();
+	$this->path = "v1/$account/$path";
+	return $this;
   }
 
   public function getPath() {
-    return $this->path;
+	return $this->path;
   }
 
-  public function setData($data) {
-    $this->data = $data;
-    return $this;
+  public function setData( $data ) {
+	$this->data = $data;
+	return $this;
   }
 
   public function getData() {
-    return $this->data;
+	return $this->data;
   }
 
   protected function getParameters() {
-    return array();
+	return [];
   }
 
-  public function addHeader($key, $value) {
-    $this->headers[] = array($key, $value);
-    return $this;
+  public function addHeader( $key, $value ) {
+	$this->headers[] = [ $key, $value ];
+	return $this;
   }
 
   protected function getProxiedFuture() {
-    if (!$this->future) {
-      $params = $this->getParameters();
-      $method = $this->getHTTPMethod();
-      $host = $this->getEndpoint();
-      $path = $this->getPath();
-      $data = $this->getData();
+	if ( !$this->future ) {
+	  $params = $this->getParameters();
+	  $method = $this->getHTTPMethod();
+	  $host = $this->getEndpoint();
+	  $path = $this->getPath();
+	  $data = $this->getData();
 
-      $uri = id(new PhutilURI("{$host}"))
-        ->setPath($path)
-        ->setQueryParams($params);
+	  $uri = id( new PhutilURI( "{$host}" ) )
+		->setPath( $path )
+		->setQueryParams( $params );
 
-      $future = id(new HTTPSFuture($uri, $data))
-        ->setMethod($method);
+	  $future = id( new HTTPSFuture( $uri, $data ) )
+		->setMethod( $method );
 
-      foreach ($this->headers as $header) {
-        list($key, $value) = $header;
-        $future->addHeader($key, $value);
-      }
+	  foreach ( $this->headers as $header ) {
+		list( $key, $value ) = $header;
+		$future->addHeader( $key, $value );
+	  }
 
-      $this->future = $future;
-    }
+	  $this->future = $future;
+	}
 
-    return $this->future;
+	return $this->future;
   }
 
   protected function shouldSignContent() {
-    return false;
+	return false;
   }
 
-  protected function didReceiveResult($result) {
-    list($status, $body, $headers) = $result;
+  protected function didReceiveResult( $result ) {
+	list( $status, $body, $headers ) = $result;
 
-    try {
+	try {
       // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-      $xml = @(new SimpleXMLElement($body));
-    } catch (Exception $ex) {
-      $xml = null;
-    }
+	  $xml = @( new SimpleXMLElement( $body ) );
+	} catch ( Exception $ex ) {
+	  $xml = null;
+	}
 
-    if ($status->isError() || !$xml) {
-      if (!($status instanceof HTTPFutureHTTPResponseStatus)) {
-        throw $status;
-      }
+	if ( $status->isError() || !$xml ) {
+	  if ( !( $status instanceof HTTPFutureHTTPResponseStatus ) ) {
+		throw $status;
+	  }
 
-      $params = array(
-        'body' => $body,
-      );
-      if ($xml) {
-        $params['RequestID'] = $xml->RequestID[0];
-        $errors = array($xml->Error);
-        foreach ($errors as $error) {
-          $params['Errors'][] = array($error->Code, $error->Message);
-        }
-      }
+	  $params = [
+		'body' => $body,
+	  ];
+	  if ( $xml ) {
+		$params['RequestID'] = $xml->RequestID[0];
+		$errors = [ $xml->Error ];
+		foreach ( $errors as $error ) {
+		  $params['Errors'][] = [ $error->Code, $error->Message ];
+		}
+	  }
 
-      throw new PhutilAWSException($status->getStatusCode(), $params);
-    }
+	  throw new PhutilAWSException( $status->getStatusCode(), $params );
+	}
 
-    return $xml;
+	return $xml;
   }
 
 }
