@@ -2,31 +2,31 @@
 
 final class PhutilSwiftFuture extends PhutilOpenstackFuture {
 
-    private $container;
+	private $container;
 
-    public function getServiceName() {
+	public function getServiceName() {
 	return 'swift';
-    }
+	}
 
-    public function setContainer( $container ) {
+	public function setContainer( $container ) {
 	$this->container = $container;
 	return $this;
-    }
+	}
 
-    /**
-     * Get the container name to use for storing a given key
-     */
-    public function getContainer( $key = '' ) {
+	/**
+	 * Get the container name to use for storing a given key
+	 */
+	public function getContainer( $key = '' ) {
 	$key_prefix = $key;
 	if ( strlen( $key_prefix ) >= 2 ) {
-	    $key_prefix = '-' . substr( $key_prefix, 0, 2 );
-	    return $this->container . $key_prefix;
+		$key_prefix = '-' . substr( $key_prefix, 0, 2 );
+		return $this->container . $key_prefix;
 	} else {
-	    return $this->container;
+		return $this->container;
 	}
-    }
+	}
 
-    public function setParametersForGetObject( $key ) {
+	public function setParametersForGetObject( $key ) {
 	$container = $this->getContainer( $key );
 
 	$this->setHTTPMethod( 'GET' );
@@ -35,16 +35,16 @@ final class PhutilSwiftFuture extends PhutilOpenstackFuture {
 	return $this;
 	}
 
-    public function setParametersForPutContainer( $key ) {
+	public function setParametersForPutContainer( $key ) {
 	$container = $this->getContainer( $key );
 
 	$this->setHTTPMethod( 'PUT' );
 	$this->setPath( $container );
 	$this->addHeader( 'X-Auth-Token', $this->getSecretKey() );
 	return $this;
-    }
+	}
 
-    public function setParametersForPutObject( $key, $value ) {
+	public function setParametersForPutObject( $key, $value ) {
 	$container = $this->getContainer( $key );
 
 	$this->setHTTPMethod( 'PUT' );
@@ -54,9 +54,9 @@ final class PhutilSwiftFuture extends PhutilOpenstackFuture {
 
 	$this->setData( $value );
 	return $this;
-    }
+	}
 
-    public function setParametersForDeleteObject( $key ) {
+	public function setParametersForDeleteObject( $key ) {
 	$container = $this->getContainer( $key );
 
 	$this->setHTTPMethod( 'DELETE' );
@@ -64,19 +64,19 @@ final class PhutilSwiftFuture extends PhutilOpenstackFuture {
 	$this->addHeader( 'X-Auth-Token', $this->getSecretKey() );
 
 	return $this;
-    }
+	}
 
-    protected function didReceiveResult( $result ) {
+	protected function didReceiveResult( $result ) {
 	list( $status, $body, $headers ) = $result;
 
 	if ( !$status->isError() ) {
-	    return $body;
+		return $body;
 	}
 
 	return parent::didReceiveResult( $result );
-    }
+	}
 
-    protected function shouldSignContent() {
+	protected function shouldSignContent() {
 	return false;
-    }
+	}
 }
