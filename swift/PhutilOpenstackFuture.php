@@ -116,6 +116,7 @@ abstract class PhutilOpenstackFuture extends FutureProxy {
     list($status, $body, $headers) = $result;
 
     try {
+      // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
       $xml = @(new SimpleXMLElement($body));
     } catch (Exception $ex) {
       $xml = null;
