@@ -130,6 +130,7 @@ abstract class PhutilOpenstackFuture extends FutureProxy {
 			$params = [
 				'body' => $body,
 			];
+
 			if ( $xml ) {
 				$params['RequestID'] = $xml->RequestID[0];
 				$errors = [ $xml->Error ];
