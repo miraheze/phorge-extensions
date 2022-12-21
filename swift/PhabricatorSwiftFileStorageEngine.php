@@ -2,33 +2,33 @@
 
 final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngine {
 
-    /**
-     * This engine identifies as `swift`.
-     */
-    public function getEngineIdentifier() {
+	/**
+	 * This engine identifies as `swift`.
+	 */
+	public function getEngineIdentifier() {
 	return 'swift';
-    }
+	}
 
-    public function getEnginePriority() {
+	public function getEnginePriority() {
 	return 100;
-    }
+	}
 
-    public function canWriteFiles() {
+	public function canWriteFiles() {
 	$container = PhabricatorEnv::getEnvConfig( 'storage.swift.container' );
 	$account = PhabricatorEnv::getEnvConfig( 'storage.swift.account' );
 	$key = PhabricatorEnv::getEnvConfig( 'storage.swift.key' );
 	$endpoint = PhabricatorEnv::getEnvConfig( 'storage.swift.endpoint' );
 
 	return ( strlen( $container ) &&
-	    strlen( $account ) &&
-	    strlen( $key ) &&
-	    strlen( $endpoint ) );
-    }
+		strlen( $account ) &&
+		strlen( $key ) &&
+		strlen( $endpoint ) );
+	}
 
-    /**
-     * Writes file data into swift.
-     */
-    public function writeFile( $data, array $params ) {
+	/**
+	 * Writes file data into swift.
+	 */
+	public function writeFile( $data, array $params ) {
 	$object = $this->newSwiftAPI();
 	$container = $this->newSwiftAPI();
 
@@ -50,22 +50,22 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 	  ] );
 
 	$res = $container
-	    ->setParametersForPutContainer( $name )
-	    ->resolve();
+		->setParametersForPutContainer( $name )
+		->resolve();
 
 	$res = $object
-	    ->setParametersForPutObject( $name, $data )
-	    ->resolve();
+		->setParametersForPutObject( $name, $data )
+		->resolve();
 
 	$profiler->endServiceCall( $call_id, [] );
 
 	return $name;
-    }
+	}
 
-    /**
-     * Load a stored blob from swift.
-     */
-    public function readFile( $handle ) {
+	/**
+	 * Load a stored blob from swift.
+	 */
+	public function readFile( $handle ) {
 	$swift = $this->newSwiftAPI();
 
 	$profiler = PhutilServiceProfiler::getInstance();
@@ -76,18 +76,18 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 	  ] );
 
 	$result = $swift
-	    ->setParametersForGetObject( $handle )
-	    ->resolve();
+		->setParametersForGetObject( $handle )
+		->resolve();
 
 	$profiler->endServiceCall( $call_id, [] );
 
 	return $result;
-    }
+	}
 
-    /**
-     * Delete a blob from swift.
-     */
-    public function deleteFile( $handle ) {
+	/**
+	 * Delete a blob from swift.
+	 */
+	public function deleteFile( $handle ) {
 	$swift = $this->newSwiftAPI();
 
 	AphrontWriteGuard::willWrite();
@@ -99,39 +99,39 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 	  ] );
 
 	$swift
-	    ->setParametersForDeleteObject( $handle )
-	    ->resolve();
+		->setParametersForDeleteObject( $handle )
+		->resolve();
 
 	$profiler->endServiceCall( $call_id, [] );
-    }
+	}
 
-    /**
-     * Retrieve the swift container name.
-     */
-    private function getContainerName() {
+	/**
+	 * Retrieve the swift container name.
+	 */
+	private function getContainerName() {
 	$container = PhabricatorEnv::getEnvConfig( 'storage.swift.container' );
 	if ( !$container ) {
-	    throw new PhabricatorFileStorageConfigurationException(
+		throw new PhabricatorFileStorageConfigurationException(
 		pht(
-		    "No '%s' specified!",
-		    'storage.swift.container' ) );
+			"No '%s' specified!",
+			'storage.swift.container' ) );
 	}
 	return $container;
-    }
+	}
 
-    /**
-     * Create a new swift API object.
-     */
-    private function newSwiftAPI() {
+	/**
+	 * Create a new swift API object.
+	 */
+	private function newSwiftAPI() {
 	$container = PhabricatorEnv::getEnvConfig( 'storage.swift.container' );
 	$account = PhabricatorEnv::getEnvConfig( 'storage.swift.account' );
 	$key = PhabricatorEnv::getEnvConfig( 'storage.swift.key' );
 	$endpoint = PhabricatorEnv::getEnvConfig( 'storage.swift.endpoint' );
 
 	return id( new PhutilSwiftFuture() )
-	    ->setAccount( $account )
-	    ->setSecretKey( new PhutilOpaqueEnvelope( $key ) )
-	    ->setEndpoint( $endpoint )
-	    ->setContainer( $container );
-    }
+		->setAccount( $account )
+		->setSecretKey( new PhutilOpaqueEnvelope( $key ) )
+		->setEndpoint( $endpoint )
+		->setContainer( $container );
+	}
 }
