@@ -46,8 +46,8 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 		$profiler = PhutilServiceProfiler::getInstance();
 		$call_id = $profiler->beginServiceCall(
 			[
-			    'type' => 'swift',
-			    'method' => 'putObject',
+				'type' => 'swift',
+				'method' => 'putObject',
 			]
 		);
 
@@ -73,8 +73,8 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 		$profiler = PhutilServiceProfiler::getInstance();
 		$call_id = $profiler->beginServiceCall(
 			[
-			    'type' => 'swift',
-			    'method' => 'getObject',
+				'type' => 'swift',
+				'method' => 'getObject',
 			]
 		);
 
@@ -97,8 +97,8 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 		$profiler = PhutilServiceProfiler::getInstance();
 		$call_id = $profiler->beginServiceCall(
 			[
-			    'type' => 'swift',
-			    'method' => 'deleteObject',
+				'type' => 'swift',
+				'method' => 'deleteObject',
 			]
 		);
 
@@ -117,8 +117,8 @@ final class PhabricatorSwiftFileStorageEngine extends PhabricatorFileStorageEngi
 		if ( !$container ) {
 			throw new PhabricatorFileStorageConfigurationException(
 				pht(
-				    "No '%s' specified!",
-				    'storage.swift.container'
+					"No '%s' specified!",
+					'storage.swift.container'
 				)
 			);
 		}
