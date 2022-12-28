@@ -53,8 +53,6 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setUser( $viewer )
 			->setObject( $file );
 
-		$properties->addAction( $download_button );
-
 		$crumbs = $this->buildApplicationCrumbs();
 		$crumbs->addTextCrumb( $title );
 		$crumbs->setBorder( true );
@@ -67,7 +65,8 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$timeline->setShouldTerminate( true );
 		$object_box = id( new PHUIObjectBoxView() )
 			->setHeader( $header )
-			->setProperties( $properties );
+			->setProperties( $properties )
+			->addAction( $download_button );
 
 		$view = id( new PHUITwoColumnView() )
 			->setHeader( $header )
