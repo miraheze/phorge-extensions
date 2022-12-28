@@ -51,8 +51,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$primary_object_phid = $file->getPHID();
 		$properties = id( new PHUIPropertyListView() )
 			->setUser( $viewer )
-			->setObject( $file )
-			->setHeader( $header );
+			->setObject( $file );
 
 		$properties->addAction( $download_button );
 
