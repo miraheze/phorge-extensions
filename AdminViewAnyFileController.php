@@ -52,7 +52,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setHeader( $header )
 			->setMainColumn( $content );
 
-		$view->addAction( $download_button );
+		// $view->addAction( $download_button );
 
 		return $this->newPage()
 			->setTitle( $title )
