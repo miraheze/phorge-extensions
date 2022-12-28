@@ -44,44 +44,44 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$file_data = $file->loadFileData();
 		$content = phutil_tag(
 			'pre',
-			array(),
+			[],
 			$file_data
 		);
 
 		$primary_object_phid = $file->getPHID();
-		$properties = id(new PHUIPropertyListView())
-			->setUser($viewer)
-			->setObject($file)
-			->setActionList($actions)
-			->setHeader($header);
+		$properties = id( new PHUIPropertyListView() )
+			->setUser( $viewer )
+			->setObject( $file )
+			->setActionList( $actions )
+			->setHeader( $header );
 
-		$properties->addAction($download_button);
+		$properties->addAction( $download_button );
 
 		$crumbs = $this->buildApplicationCrumbs();
-		$crumbs->addTextCrumb($title);
-		$crumbs->setBorder(true);
+		$crumbs->addTextCrumb( $title );
+		$crumbs->setBorder( true );
 
 		$timeline = $this->buildTransactionTimeline(
 			$file,
 			new PhabricatorFileTransactionQuery()
 		);
 
-		$timeline->setShouldTerminate(true);
-		$object_box = id(new PHUIObjectBoxView())
-			->setHeader($header)
-			->setProperties($properties);
+		$timeline->setShouldTerminate( true );
+		$object_box = id( new PHUIObjectBoxView() )
+			->setHeader( $header )
+			->setProperties( $properties );
 
-		$view = id(new PHUITwoColumnView())
-			->setHeader($header)
-			->setFooter(array(
+		$view = id( new PHUITwoColumnView() )
+			->setHeader( $header )
+			->setFooter( [
 				$object_box,
 				$timeline,
-			)
+			]
 		);
 
 		return $this->newPage()
-			->setTitle($title)
-			->setCrumbs($crumbs)
-			->appendChild($view);
+			->setTitle( $title )
+			->setCrumbs( $crumbs )
+			->appendChild( $view );
 	}
 }
