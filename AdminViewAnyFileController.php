@@ -1,6 +1,7 @@
 <?php
 
 class AdminViewAnyFileController extends PhabricatorController {
+
 	public function handleRequest( AphrontRequest $request ) {
 		$viewer = $this->getViewer();
 
@@ -33,7 +34,6 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$header = id( new PHUIHeaderView() )
 			->setHeader( $title );
 
-		// Create a download button
 		$download_button = id( new PHUIButtonView() )
 			->setTag( 'a' )
 			->setText( pht( 'Download File' ) )
@@ -41,21 +41,47 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setIcon( 'fa-download' )
 			->setWorkflow( true );
 
-		// Display the file contents
+		$file_data = $file->loadFileData();
 		$content = phutil_tag(
 			'pre',
-			[],
-			$file->loadFileData()
+			array(),
+			$file_data
 		);
 
-		$view = id( new PHUITwoColumnView() )
-			->setHeader( $header )
-			->setMainColumn( $content );
+		$primary_object_phid = $file->getPHID();
+		$properties = id(new PHUIPropertyListView())
+			->setUser($viewer)
+			->setObject($file)
+			->setActionList($actions)
+			->setHeader($header);
 
-		// $view->addAction( $download_button );
+		$properties->addAction($download_button);
+
+		$crumbs = $this->buildApplicationCrumbs();
+		$crumbs->addTextCrumb($title);
+		$crumbs->setBorder(true);
+
+		$timeline = $this->buildTransactionTimeline(
+			$file,
+			new PhabricatorFileTransactionQuery()
+		);
+
+		$timeline->setShouldTerminate(true);
+		$object_box = id(new PHUIObjectBoxView())
+			->setHeader($header)
+			->setProperties($properties);
+
+		$view = id(new PHUITwoColumnView())
+			->setHeader($header)
+			->setFooter(array(
+				$object_box,
+				$timeline,
+			)
+		);
 
 		return $this->newPage()
-			->setTitle( $title )
-			->appendChild( $view );
+			->setTitle($title)
+			->setCrumbs($crumbs)
+			->appendChild($view);
 	}
 }
