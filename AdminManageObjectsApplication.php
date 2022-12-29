@@ -10,7 +10,7 @@ class AdminManageObjectsApplication extends PhabricatorApplication {
 	}
 
 	public function getIconName() {
-		return 'admin';
+		return 'fa-tasks';
 	}
 
 	public function getShortDescription() {
@@ -24,26 +24,12 @@ class AdminManageObjectsApplication extends PhabricatorApplication {
 	public function getRoutes() {
 		return [
 			'/admin/' => [
+				'' => 'AdminManageObjectsController',
 				'file/' => 'AdminChangeAnyFileVisibilityController',
 				'file/(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
 				'file/path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
 				'file/visibility/' => 'AdminChangeFileVisibilityController',
 			],
 		];
-	}
-
-	public function buildApplicationMenu() {
-		$menu = parent::buildApplicationMenu();
-
-		$viewer = $this->getViewer();
-		if ( $viewer->getIsAdmin() ) {
-			$item = id( new PHUIListItemView() )
-				->setName( pht( 'Change Any File Visibility' ) )
-				->setIcon( 'fa-file' )
-				->setHref( '/admin/file/' );
-			$menu->addMenuItem( $item );
-		}
-
-		return $menu;
 	}
 }
