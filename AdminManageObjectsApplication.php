@@ -1,8 +1,8 @@
 <?php
 
-class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
+class AdminManageObjectsApplication extends PhabricatorApplication {
 	public function getName() {
-		return pht( 'Change File Visibility' );
+		return pht( 'Admin Manage Objects' );
 	}
 
 	public function getBaseURI() {
@@ -14,7 +14,7 @@ class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 	}
 
 	public function getShortDescription() {
-		return pht( 'Allow admins to change the visibility of any file' );
+		return pht( 'Allow admins to change the visibility objects they have no access to' );
 	}
 
 	public function getApplicationGroup() {
