@@ -19,17 +19,17 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$file = null;
 		if ( $id ) {
 			$file = id( new PhabricatorFile() )
-				->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC )
 				->loadOneWhere( 'id = %d', $id );
 		} elseif ( $path ) {
 			$file = id( new PhabricatorFile() )
-				->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC )
 				->loadOneWhere( 'name = %s', $path );
 		}
 
 		if ( !$file ) {
 			return new Aphront404Response();
 		}
+
+		$file->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC );
 
 		$title = pht( 'View File: %s', $file->getName() );
 
