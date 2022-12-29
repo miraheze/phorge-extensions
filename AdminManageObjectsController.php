@@ -9,7 +9,8 @@ class AdminManageObjectsController extends PhabricatorController {
 	}
 
 	public function buildApplicationMenu() {
-		$menu = parent::buildApplicationMenu();
+		$menu = $this->newApplicationMenu()
+			->setSearchEngine( new PhabricatorFileSearchEngine() );
 
 		$viewer = $this->getViewer();
 		if ( $viewer->getIsAdmin() ) {
