@@ -9,7 +9,7 @@ class AdminManageObjectsApplication extends PhabricatorApplication {
 		return '/admin/';
 	}
 
-	public function getIconName() {
+	public function getIcon() {
 		return 'fa-tasks';
 	}
 
