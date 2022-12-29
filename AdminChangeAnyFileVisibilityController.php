@@ -44,6 +44,7 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 			)
 			->appendChild(
 				id( new AphrontFormTextControl() )
+					->setLabel( pht( 'PHID' ) )
 					->setName( 'id' )
 					->setValue( $file ? $file->getID() : '' )
 			)
