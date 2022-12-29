@@ -50,7 +50,7 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 				id( new AphrontFormTextControl() )
 					->setName( 'id' )
 					->setValue( $file ? $file->getID() : '' )
-			);
+			)
 			->appendChild(
 				id( new AphrontFormSubmitControl() )
 					->setValue( pht( 'Save Visibility' ) )
