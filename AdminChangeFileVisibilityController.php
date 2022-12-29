@@ -15,7 +15,7 @@ class AdminChangeFileVisibilityController extends PhabricatorController {
 			->loadOneWhere( 'id = %d', $id );
 
 		if ( !$file ) {
-			return new Aphront400Response();
+			return new Aphront404Response();
 		}
 
 		$new_visibility = $request->getStr( 'visibility' );
