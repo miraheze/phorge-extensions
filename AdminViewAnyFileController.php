@@ -19,9 +19,11 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$file = null;
 		if ( $id ) {
 			$file = id( new PhabricatorFile() )
+				->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC )
 				->loadOneWhere( 'id = %d', $id );
 		} elseif ( $path ) {
 			$file = id( new PhabricatorFile() )
+				->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC )
 				->loadOneWhere( 'name = %s', $path );
 		}
 
