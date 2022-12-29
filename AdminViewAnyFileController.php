@@ -46,7 +46,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$form = id( new AphrontFormView() )
 			->setUser( $viewer )
 			->setMethod( 'POST' )
-			->setAction( $this->getApplicationURI( 'visibility/'. $file->getID() . '/' ) )
+			->setAction( $this->getApplicationURI( 'visibility/' . $file->getID() . '/' ) )
 			->appendChild(
 				id( new AphrontFormSelectControl() )
 					->setLabel( pht( 'Visibility' ) )
@@ -117,6 +117,6 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$file->save();
 
 		return id( new AphrontRedirectResponse() )
- 			->setURI( $file->getURI() );
+			->setURI( $file->getURI() );
 	}
 }
