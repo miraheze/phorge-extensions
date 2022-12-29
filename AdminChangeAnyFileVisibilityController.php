@@ -1,6 +1,6 @@
 <?php
 
-class AdminChangeAnyFileVisibilityController extends AdminManageObjectsController {
+class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 
 	public function handleRequest( AphrontRequest $request ) {
 		$viewer = $this->getViewer();
