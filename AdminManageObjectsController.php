@@ -9,19 +9,21 @@ class AdminManageObjectsController extends PhabricatorController {
 	}
 
 	public function buildApplicationMenu() {
-		$menu = $this->newApplicationMenu()
-			->setSearchEngine( new PhabricatorFileSearchEngine() );
-
 		$viewer = $this->getViewer();
+
+		$nav = id( new AphrontSideNavFilterView() )
+			->setBaseURI( new PhutilURI( $this->getApplicationURI() ) )
+			->setViewer( $viewer );
+
 		if ( $viewer->getIsAdmin() ) {
 			$item = id( new PHUIListItemView() )
 				->setName( pht( 'Change Any File Visibility' ) )
 				->setIcon( 'fa-file' )
 				->setHref( $this->getApplicationURI( 'file/' ) );
 
-			$menu->addMenuItem( $item );
+			$nav->addMenuItem( $item );
 		}
 
-		return $menu;
+		return $nav->getMenu();
 	}
 }
