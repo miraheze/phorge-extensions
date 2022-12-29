@@ -22,17 +22,17 @@ class AdminChangeFileVisibilityController extends PhabricatorController {
 			return new Aphront404Response();
 		}
 
-		$new_visibility = $request->getStr( 'visibility' );
-		if ( !$new_visibility ) {
+		$visibility = $request->getStr( 'visibility' );
+		if ( !$visibility ) {
 			return new Aphront400Response();
 		}
 
 		$visibility_values = [ 'public', 'private', 'admin' ];
-		if ( !in_array( $new_visibility, $visibility_values ) ) {
+		if ( !in_array( $visibility, $visibility_values ) ) {
 			return new Aphront400Response();
 		}
 
-		$file->setViewPolicy( $new_visibility );
+		$file->setViewPolicy( $visibility );
 		$file->save();
 
 		return id( new AphrontRedirectResponse() )
