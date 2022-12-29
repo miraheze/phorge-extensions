@@ -14,7 +14,7 @@ class AdminManageObjectsApplication extends PhabricatorApplication {
 	}
 
 	public function getShortDescription() {
-		return pht( 'Allow admins to change the visibility objects they have no access to' );
+		return pht( 'Allow admins to change the visibility of objects they have no access to' );
 	}
 
 	public function getApplicationGroup() {
