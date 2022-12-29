@@ -25,26 +25,15 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 				->loadOneWhere( 'name = %s', $path );
 		}
 
-		if ( !$file ) {
-			return new Aphront404Response();
-		}
-
-		$title = pht( 'View File: %s', $file->getName() );
+		$title = pht( 'Change File Visibility: %s', $file ? $file->getName() : '<unknown file>' );
 
 		$header = id( new PHUIHeaderView() )
 			->setHeader( $title );
 
-		$download_button = id( new PHUIButtonView() )
-			->setTag( 'a' )
-			->setText( pht( 'Download File' ) )
-			->setHref( $file->getBestURI() )
-			->setIcon( 'fa-download' )
-			->setWorkflow( true );
-
 		$form = id( new AphrontFormView() )
 			->setUser( $viewer )
 			->setMethod( 'POST' )
-			->setAction( $this->getApplicationURI( 'visibility/' . $file->getID() . '/' ) )
+			->setAction( $this->getApplicationURI( 'file/visibility/' ) )
 			->appendChild(
 				id( new AphrontFormSelectControl() )
 					->setLabel( pht( 'Visibility' ) )
@@ -55,30 +44,21 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 						PhabricatorPolicies::POLICY_ADMIN => pht( 'Only Administrators' ),
 						PhabricatorPolicies::POLICY_NOONE => pht( 'Only Me' ),
 					] )
-					->setValue( $file->getViewPolicy() )
+					->setValue( $file ? $file->getViewPolicy() : PhabricatorPolicies::POLICY_NOONE )
 			)
 			->appendChild(
 				id( new AphrontFormTextControl() )
 					->setName( 'id' )
-					->setValue( $file->getID() )
+					->setValue( $file ? $file->getID() : '' )
 			);
 			->appendChild(
 				id( new AphrontFormSubmitControl() )
 					->setValue( pht( 'Save Visibility' ) )
 			);
 
-		$file_data = $file->loadFileData();
-		$content = phutil_tag(
-			'pre',
-			[],
-			$file_data
-		);
-
-		$column = id( new PHUITwoColumnView() )
-			->setHeader( $header )
-			->setFooter( $form );
-
 		$view = id( new PHUITwoColumnView() )
+			->setHeader( $header )
+			->setFooter( $form )
 			->setMainColumn( $column );
 
 		return $this->newPage()
