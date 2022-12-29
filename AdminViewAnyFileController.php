@@ -43,27 +43,27 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setIcon( 'fa-download' )
 			->setWorkflow( true );
 
-		$form = id(new AphrontFormView())
-			->setMethod('POST')
+		$form = id( new AphrontFormView() )
+			->setMethod( 'POST' )
 			->appendChild(
-				id(new AphrontFormSelectControl())
-					->setLabel(pht('Visibility'))
-					->setName('visibility')
-					->setOptions(array(
-						PhabricatorPolicies::POLICY_PUBLIC => pht('Public'),
-						PhabricatorPolicies::POLICY_USER => pht('Logged In Users'),
-						PhabricatorPolicies::POLICY_NOONE => pht('Only Me'),
-					))
-					->setValue($file->getViewPolicy())
+				id( new AphrontFormSelectControl() )
+					->setLabel( pht( 'Visibility' ) )
+					->setName( 'visibility' )
+					->setOptions( [
+						PhabricatorPolicies::POLICY_PUBLIC => pht( 'Public' ),
+						PhabricatorPolicies::POLICY_USER => pht( 'Logged In Users' ),
+						PhabricatorPolicies::POLICY_NOONE => pht( 'Only Me' ),
+					] )
+					->setValue( $file->getViewPolicy() )
 			)
 			->appendChild(
-				id(new AphrontFormSubmitControl())
-					->setValue(pht('Save Visibility'))
+				id( new AphrontFormSubmitControl() )
+					->setValue( pht( 'Save Visibility' ) )
 			)
 			->appendChild(
-				id(new AphrontFormHiddenControl())
-					->setName('objectID')
-					->setValue($file->getID())
+				id( new AphrontFormHiddenControl() )
+					->setName( 'objectID' )
+					->setValue( $file->getID() )
 			);
 
 		$file_data = $file->loadFileData();
@@ -73,18 +73,17 @@ class AdminViewAnyFileController extends PhabricatorController {
 			$file_data
 		);
 
+		$left_column = id( new PHUITwoColumnView() )
+			->setHeader( $header )
+			->setFooter( $form );
 
-		$left_column = id(new PHUITwoColumnView())
-			->setHeader($header)
-			->setFooter($form);
+		$right_column = id( new PHUITwoColumnView() )
+			->setHeader( $download_button )
+			->setMainColumn( $content );
 
-		$right_column = id(new PHUITwoColumnView())
-			->setHeader($download_button)
-			->setMainColumn($content);
-
-		$view = id(new PHUITwoColumnView())
-			->setLeftColumn($left_column)
-			->setRightColumn($right_column);
+		$view = id( new PHUITwoColumnView() )
+			->setLeftColumn( $left_column )
+			->setRightColumn( $right_column );
 
 		return $this->newPage()
 			->setTitle( $title )
