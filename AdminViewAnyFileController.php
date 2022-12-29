@@ -29,7 +29,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 			return new Aphront404Response();
 		}
 
-		$file->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC )->save();
+		$file->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC );
 
 		$title = pht( 'View File: %s', $file->getName() );
 
