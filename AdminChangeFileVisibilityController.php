@@ -2,14 +2,14 @@
 
 class AdminChangeFileVisibilityController extends PhabricatorController {
 
-	public function handleRequest( AphrontRequest $request ) {
+	public function handleRequest( AphrontRequest $request, $id ) {
 		$viewer = $this->getViewer();
 
 		if ( !$viewer->getIsAdmin() ) {
 			return new Aphront403Response();
 		}
 
-		$id = $request->getInt( 'id' );
+		// $id = $request->getInt( 'id' );
 
 		$file = id( new PhabricatorFile() )
 			->loadOneWhere( 'id = %d', $id );
