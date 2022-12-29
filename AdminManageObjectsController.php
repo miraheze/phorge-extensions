@@ -2,11 +2,11 @@
 
 class AdminManageObjectsController extends PhabricatorController {
 
-    public function handleRequest(AphrontRequest $request) {
-        return id(new PhabricatorFileSearchEngine())
-            ->setController($this)
-            ->buildResponse();
-    }
+	public function handleRequest( AphrontRequest $request ) {
+		return id( new PhabricatorFileSearchEngine() )
+			->setController( $this )
+			->buildResponse();
+	}
 
 	public function buildApplicationMenu() {
 		$menu = parent::buildApplicationMenu();
