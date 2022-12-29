@@ -21,7 +21,7 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 				->loadOneWhere( 'name = %s', $path );
 		}
 
-		$title = pht( 'Change File Visibility: %s', $file ? $file->getName() : '<unknown file>' );
+		$title = pht( 'Change File Visibility: %s', $file ? $file->getName() : '' );
 
 		$header = id( new PHUIHeaderView() )
 			->setHeader( $title );
