@@ -6,11 +6,11 @@ class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 	}
 
 	public function getBaseURI() {
-		return '/file/';
+		return '/admin/';
 	}
 
 	public function getIconName() {
-		return 'file';
+		return 'admin';
 	}
 
 	public function getShortDescription() {
@@ -23,11 +23,11 @@ class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 
 	public function getRoutes() {
 		return [
-			'/file/' => [
-				'' => 'AdminChangeAnyFileVisibilityController',
-				'(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
-				'path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
-				'visibility/(?P<id>\d+)/' => 'AdminChangeFileVisibilityController',
+			'/admin/' => [
+				'file/' => 'AdminChangeAnyFileVisibilityController',
+				'file/(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
+				'file/path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
+				'file/visibility/(?P<id>\d+)/' => 'AdminChangeFileVisibilityController',
 			],
 		];
 	}
