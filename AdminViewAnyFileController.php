@@ -65,7 +65,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$timeline->setShouldTerminate( true );
 		$object_box = id( new PHUIObjectBoxView() )
 			->setHeader( $header )
-			->setProperties( $properties )
+			->addPropertyList( $properties )
 			->addAction( $download_button );
 
 		$view = id( new PHUITwoColumnView() )
