@@ -82,8 +82,8 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setMainColumn( $content );
 
 		$view = id( new PHUITwoColumnView() )
-			->setPrimaryColumn( $left_column )
-			->addSecondaryColumn( $right_column );
+			->addColumn( $left_column )
+			->addColumn( $right_column );
 
 		return $this->newPage()
 			->setTitle( $title )
