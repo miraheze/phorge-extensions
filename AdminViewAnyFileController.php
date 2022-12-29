@@ -90,4 +90,36 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setTitle( $title )
 			->appendChild( $view );
 	}
+
+    public function handleChangeVisibilityRequest(AphrontRequest $request) {
+        $viewer = $this->getViewer();
+
+        if (!$viewer->getIsAdmin()) {
+            return new Aphront403Response();
+        }
+
+        $file_id = $request->getInt('objectID');
+        $visibility = $request->getStr('visibility');
+
+        $file = id(new PhabricatorFile())
+            ->loadOneWhere('id = %d', $file_id);
+
+        if (!$file) {
+            return new Aphront404Response();
+        }
+
+        $xactions = array();
+        $xactions[] = id(new PhabricatorFileTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_VISIBILITY)
+            ->setNewValue($visibility);
+
+        id(new PhabricatorFileEditor())
+            ->setActor($viewer)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnMissingFields(true)
+            ->setContinueOnNoEffect(true)
+            ->applyTransactions($file, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI('/file/view/'.$file->getID().'/');
+    }
 }
