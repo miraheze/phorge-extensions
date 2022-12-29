@@ -46,7 +46,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$form = id( new AphrontFormView() )
 			->setUser( $viewer )
 			->setMethod( 'POST' )
-			->setAction( '/file/visibility/' )
+			->setAction( $this->getApplicationURI( 'visibility/'. $file->getID() . '/' ) )
 			->appendChild(
 				id( new AphrontFormSelectControl() )
 					->setLabel( pht( 'Visibility' ) )
@@ -61,11 +61,6 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->appendChild(
 				id( new AphrontFormSubmitControl() )
 					->setValue( pht( 'Save Visibility' ) )
-			)
-			->appendChild(
-				id( new AphrontFormTextControl() )
-					->setName( 'objectID' )
-					->setValue( $file->getID() )
 			);
 
 		$file_data = $file->loadFileData();
@@ -99,28 +94,29 @@ class AdminViewAnyFileController extends PhabricatorController {
 			return new Aphront403Response();
 		}
 
-		$file_id = $request->getInt( 'objectID' );
-		$visibility = $request->getStr( 'visibility' );
+		$id = $request->getInt( 'id' );
 
 		$file = id( new PhabricatorFile() )
-			->loadOneWhere( 'id = %d', $file_id );
+			->loadOneWhere( 'id = %d', $id );
 
 		if ( !$file ) {
 			return new Aphront404Response();
 		}
 
-		$xactions = [];
-		$xactions[] = id( new PhabricatorFileTransaction() )
-			->setTransactionType( PhabricatorTransactions::TYPE_VISIBILITY )
-			->setNewValue( $visibility );
+		$new_visibility = $request->getStr( 'visibility' );
+		if ( !$new_visibility ) {
+			return new Aphront400Response();
+		}
 
-		id( new PhabricatorFileEditor() )
-			->setActor( $viewer )
-			->setContentSourceFromRequest( $request )
-			->setContinueOnMissingFields( true )
-			->setContinueOnNoEffect( true )
-			->applyTransactions( $file, $xactions );
+		$visibility_values = [ 'public', 'private' ];
+		if ( !in_array( $new_visibility, $visibility_values ) ) {
+			return new Aphront400Response();
+		}
 
-		return id( new AphrontRedirectResponse() )->setURI( '/file/view/' . $file->getID() . '/' );
+		$file->setViewPolicy( $new_visibility );
+		$file->save();
+
+		return id( new AphrontRedirectResponse() )
+ 			->setURI( $file->getURI() );
 	}
 }
