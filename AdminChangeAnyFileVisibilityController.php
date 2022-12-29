@@ -1,6 +1,6 @@
 <?php
 
-class AdminViewAnyFileController extends PhabricatorController {
+class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 
 	public function handleRequest( AphrontRequest $request ) {
 		$viewer = $this->getViewer();
@@ -29,8 +29,6 @@ class AdminViewAnyFileController extends PhabricatorController {
 			return new Aphront404Response();
 		}
 
-		$file->setViewPolicy( PhabricatorPolicies::POLICY_PUBLIC );
-
 		$title = pht( 'View File: %s', $file->getName() );
 
 		$header = id( new PHUIHeaderView() )
@@ -54,6 +52,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 					->setOptions( [
 						PhabricatorPolicies::POLICY_PUBLIC => pht( 'Public' ),
 						PhabricatorPolicies::POLICY_USER => pht( 'Logged In Users' ),
+						PhabricatorPolicies::POLICY_ADMIN => pht( 'Only Administrators' ),
 						PhabricatorPolicies::POLICY_NOONE => pht( 'Only Me' ),
 					] )
 					->setValue( $file->getViewPolicy() )
