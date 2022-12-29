@@ -59,6 +59,11 @@ class AdminViewAnyFileController extends PhabricatorController {
 					->setValue( $file->getViewPolicy() )
 			)
 			->appendChild(
+				id( new AphrontFormTextControl() )
+					->setName( 'id' )
+					->setValue( $file->getID() )
+			);
+			->appendChild(
 				id( new AphrontFormSubmitControl() )
 					->setValue( pht( 'Save Visibility' ) )
 			);
@@ -70,17 +75,12 @@ class AdminViewAnyFileController extends PhabricatorController {
 			$file_data
 		);
 
-		$left_column = id( new PHUITwoColumnView() )
+		$column = id( new PHUITwoColumnView() )
 			->setHeader( $header )
 			->setFooter( $form );
 
-		$right_column = id( new PHUITwoColumnView() )
-			->appendChild( $download_button )
-			->setMainColumn( $content );
-
 		$view = id( new PHUITwoColumnView() )
-			->setMainColumn( $left_column )
-			->setSideColumn( $right_column );
+			->setMainColumn( $column );
 
 		return $this->newPage()
 			->setTitle( $title )
