@@ -46,6 +46,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 		$form = id( new AphrontFormView() )
 			->setUser( $viewer )
 			->setMethod( 'POST' )
+			->setAction( '/file/visibility/' )
 			->appendChild(
 				id( new AphrontFormSelectControl() )
 					->setLabel( pht( 'Visibility' ) )
