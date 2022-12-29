@@ -12,10 +12,6 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 		$id = $request->getInt( 'id' );
 		$path = $request->getStr( 'path' );
 
-		if ( !$id && !$path ) {
-			return new Aphront400Response();
-		}
-
 		$file = null;
 		if ( $id ) {
 			$file = id( new PhabricatorFile() )
