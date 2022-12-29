@@ -27,7 +27,7 @@ class AdminChangeFileVisibilityController extends PhabricatorController {
 			return new Aphront400Response();
 		}
 
-		$visibility_values = [ 'public', 'private' ];
+		$visibility_values = [ 'public', 'private', 'admin' ];
 		if ( !in_array( $new_visibility, $visibility_values ) ) {
 			return new Aphront400Response();
 		}
