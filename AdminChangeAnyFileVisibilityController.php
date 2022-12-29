@@ -37,7 +37,7 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 					->setOptions( [
 						PhabricatorPolicies::POLICY_PUBLIC => pht( 'Public' ),
 						PhabricatorPolicies::POLICY_USER => pht( 'Logged In Users' ),
-						PhabricatorPolicies::POLICY_ADMIN => pht( 'Only Administrators' ),
+						PhabricatorPolicies::POLICY_ADMIN => pht( 'Administrators' ),
 						PhabricatorPolicies::POLICY_NOONE => pht( 'Only Me' ),
 					] )
 					->setValue( $file ? $file->getViewPolicy() : PhabricatorPolicies::POLICY_NOONE )
