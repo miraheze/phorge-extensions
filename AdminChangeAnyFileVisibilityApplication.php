@@ -1,8 +1,8 @@
 <?php
 
-class AdminViewAnyFileApplication extends PhabricatorApplication {
+class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 	public function getName() {
-		return pht( 'View Any File' );
+		return pht( 'Change File Visibility' );
 	}
 
 	public function getBaseURI() {
@@ -14,7 +14,7 @@ class AdminViewAnyFileApplication extends PhabricatorApplication {
 	}
 
 	public function getShortDescription() {
-		return pht( 'Allow admins to view any file' );
+		return pht( 'Allow admins to change the visibility of any file' );
 	}
 
 	public function getApplicationGroup() {
@@ -24,9 +24,9 @@ class AdminViewAnyFileApplication extends PhabricatorApplication {
 	public function getRoutes() {
 		return [
 			'/file/' => [
-				'' => 'AdminViewAnyFileController',
-				'(?P<id>\d+)/' => 'AdminViewAnyFileController',
-				'path/(?P<path>.+)/' => 'AdminViewAnyFileController',
+				'' => 'AdminChangeAnyFileVisibilityController',
+				'(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
+				'path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
 				'visibility/(?P<id>\d+)/' => 'AdminChangeFileVisibilityController',
 			],
 		];
@@ -38,7 +38,7 @@ class AdminViewAnyFileApplication extends PhabricatorApplication {
 		$viewer = $this->getViewer();
 		if ( $viewer->getIsAdmin() ) {
 			$item = id( new PHUIListItemView() )
-				->setName( pht( 'View Any File' ) )
+				->setName( pht( 'Change Any File Visibility' ) )
 				->setIcon( 'fa-file' )
 				->setHref( '/file/' );
 			$menu->addMenuItem( $item );
