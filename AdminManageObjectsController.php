@@ -1,6 +1,6 @@
 <?php
 
-abstract class AdminManageObjectsController extends PhabricatorController {
+class AdminManageObjectsController extends PhabricatorController {
 
 	public function buildApplicationMenu() {
 		$menu = parent::buildApplicationMenu();
