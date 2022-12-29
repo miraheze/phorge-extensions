@@ -54,8 +54,7 @@ class AdminChangeAnyFileVisibilityController extends PhabricatorController {
 
 		$view = id( new PHUITwoColumnView() )
 			->setHeader( $header )
-			->setFooter( $form )
-			->setMainColumn( $column );
+			->setFooter( $form );
 
 		return $this->newPage()
 			->setTitle( $title )
