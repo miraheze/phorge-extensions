@@ -61,8 +61,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 					->setValue( pht( 'Save Visibility' ) )
 			)
 			->appendChild(
-				id( new AphrontFormMarkupControl() )
-					->setIsHidden( true )
+				id( new AphrontFormTextControl() )
 					->setName( 'objectID' )
 					->setValue( $file->getID() )
 			);
