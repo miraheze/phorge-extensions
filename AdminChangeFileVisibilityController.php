@@ -9,7 +9,7 @@ class AdminChangeFileVisibilityController extends PhabricatorController {
 			return new Aphront403Response();
 		}
 
-		$id = $request->getInt( 'id' );
+		$id = $request->getInt( 'id' ) ?: 1979948;
 
 		if ( !$id ) {
 			return new Aphront400Response();
