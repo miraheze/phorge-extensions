@@ -100,7 +100,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->loadOneWhere( 'id = %d', $id );
 
 		if ( !$file ) {
-			return new Aphront404Response();
+			return new Aphront400Response();
 		}
 
 		$new_visibility = $request->getStr( 'visibility' );
