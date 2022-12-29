@@ -27,7 +27,7 @@ class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 				'file/' => 'AdminChangeAnyFileVisibilityController',
 				'file/(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
 				'file/path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
-				'file/visibility/(?P<id>\d+)/' => 'AdminChangeFileVisibilityController',
+				'file/visibility/' => 'AdminChangeFileVisibilityController',
 			],
 		];
 	}
@@ -40,7 +40,7 @@ class AdminChangeAnyFileVisibilityApplication extends PhabricatorApplication {
 			$item = id( new PHUIListItemView() )
 				->setName( pht( 'Change Any File Visibility' ) )
 				->setIcon( 'fa-file' )
-				->setHref( '/file/' );
+				->setHref( '/admin/file/' );
 			$menu->addMenuItem( $item );
 		}
 
