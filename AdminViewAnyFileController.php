@@ -43,6 +43,29 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setIcon( 'fa-download' )
 			->setWorkflow( true );
 
+		$form = id(new AphrontFormView())
+			->setMethod('POST')
+			->appendChild(
+				id(new AphrontFormSelectControl())
+					->setLabel(pht('Visibility'))
+					->setName('visibility')
+					->setOptions(array(
+						PhabricatorPolicies::POLICY_PUBLIC => pht('Public'),
+						PhabricatorPolicies::POLICY_USER => pht('Logged In Users'),
+						PhabricatorPolicies::POLICY_NOONE => pht('Only Me'),
+					))
+					->setValue($file->getViewPolicy())
+			)
+			->appendChild(
+				id(new AphrontFormSubmitControl())
+					->setValue(pht('Save Visibility'))
+			)
+			->appendChild(
+				id(new AphrontFormHiddenControl())
+					->setName('objectID')
+					->setValue($file->getID())
+			);
+
 		$file_data = $file->loadFileData();
 		$content = phutil_tag(
 			'pre',
@@ -50,37 +73,21 @@ class AdminViewAnyFileController extends PhabricatorController {
 			$file_data
 		);
 
-		$primary_object_phid = $file->getPHID();
-		$properties = id( new PHUIPropertyListView() )
-			->setUser( $viewer )
-			->setObject( $file );
 
-		$crumbs = $this->buildApplicationCrumbs();
-		$crumbs->addTextCrumb( $title );
-		$crumbs->setBorder( true );
+		$left_column = id(new PHUITwoColumnView())
+			->setHeader($header)
+			->setFooter($form);
 
-		$timeline = $this->buildTransactionTimeline(
-			$file,
-			new PhabricatorFileTransactionQuery()
-		);
+		$right_column = id(new PHUITwoColumnView())
+			->setHeader($download_button)
+			->setMainColumn($content);
 
-		$timeline->setShouldTerminate( true );
-		$object_box = id( new PHUIObjectBoxView() )
-			->setHeader( $header )
-			->addPropertyList( $properties )
-			->appendChild( $download_button );
-
-		$view = id( new PHUITwoColumnView() )
-			->setHeader( $header )
-			->setFooter( [
-				$object_box,
-				$timeline,
-			]
-		);
+		$view = id(new PHUITwoColumnView())
+			->setLeftColumn($left_column)
+			->setRightColumn($right_column);
 
 		return $this->newPage()
 			->setTitle( $title )
-			->setCrumbs( $crumbs )
 			->appendChild( $view );
 	}
 }
