@@ -24,7 +24,6 @@ class AdminManageObjectsApplication extends PhabricatorApplication {
 	public function getRoutes() {
 		return [
 			'/admin/' => [
-				'' => 'AdminManageObjectsController',
 				'file/' => 'AdminChangeAnyFileVisibilityController',
 				'file/(?P<id>\d+)/' => 'AdminChangeAnyFileVisibilityController',
 				'file/path/(?P<path>.+)/' => 'AdminChangeAnyFileVisibilityController',
