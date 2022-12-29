@@ -44,6 +44,7 @@ class AdminViewAnyFileController extends PhabricatorController {
 			->setWorkflow( true );
 
 		$form = id( new AphrontFormView() )
+			->setUser( $viewer )
 			->setMethod( 'POST' )
 			->appendChild(
 				id( new AphrontFormSelectControl() )
