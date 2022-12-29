@@ -27,7 +27,7 @@ class AdminViewAnyFileApplication extends PhabricatorApplication {
 				'' => 'AdminViewAnyFileController',
 				'(?P<id>\d+)/' => 'AdminViewAnyFileController',
 				'path/(?P<path>.+)/' => 'AdminViewAnyFileController',
-				'visibility/(?P<id>\d+)/' => [ 'AdminViewAnyFileController', 'handleChangeVisibilityRequest' ],
+				'visibility/(?P<id>\d+)/' => 'AdminChangeFileVisibilityController',
 			],
 		];
 	}
