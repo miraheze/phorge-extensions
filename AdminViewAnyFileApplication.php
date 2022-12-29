@@ -24,10 +24,10 @@ class AdminViewAnyFileApplication extends PhabricatorApplication {
 	public function getRoutes() {
 		return [
 			'/file/' => [
-				'view/' => 'AdminViewAnyFileController',
-				'view/(?P<id>\d+)/' => 'AdminViewAnyFileController',
-				'view/path/(?P<path>.+)/' => 'AdminViewAnyFileController',
-				'visibility/' => [ 'AdminViewAnyFileController', 'handleChangeVisibilityRequest' ],
+				'' => 'AdminViewAnyFileController',
+				'(?P<id>\d+)/' => 'AdminViewAnyFileController',
+				'path/(?P<path>.+)/' => 'AdminViewAnyFileController',
+				'visibility/(?P<id>\d+)/' => [ 'AdminViewAnyFileController', 'handleChangeVisibilityRequest' ],
 			],
 		];
 	}
