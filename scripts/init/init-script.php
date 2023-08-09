@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @license http://www.apache.org/licenses/ Apache License 2.0
+ */
+
 function init_script(array $options = array())
 {
   error_reporting(E_ALL | E_STRICT);
