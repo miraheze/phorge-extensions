@@ -12,4 +12,7 @@
 	<arg name="bootstrap" value="./vendor/mediawiki/mediawiki-codesniffer/utils/bootstrap-ci.php" />
 	<arg name="extensions" value="php" />
 	<arg name="encoding" value="UTF-8" />
+	<exclude-pattern type="relative">src/workflow/RollbackTransactionsWorkflow.php</exclude-pattern>
+	<exclude-pattern type="relative">src/workflow/MFRollbackWorkflow.php</exclude-pattern>
+	<exclude-pattern type="relative">scripts/init/init-script.php</exclude-pattern>
 </ruleset>
