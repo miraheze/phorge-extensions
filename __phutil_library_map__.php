@@ -31,6 +31,7 @@ phutil_register_library_map( [
 	'AdminChangeFileVisibilityController' => 'PhabricatorController',
 	'GitHubAccountCustomField' => 'PhabricatorUserCustomField',
 	'MediaWikiUserpageCustomField' => 'PhabricatorUserCustomField',
+	'PhabricatorMediaWikiAuthProvider' => 'PhabricatorOAuth1AuthProvider',
 	'PhutilCustomProxy' => 'PhutilHTTPEngineExtension',
 	'PhutilMediaWikiAuthAdapter' => 'PhutilOAuth1AuthAdapter',
 	'ProjectOpenTasksProfileMenuItem' => 'PhabricatorProfileMenuItem',
