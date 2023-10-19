@@ -16,12 +16,12 @@ function init_script(array $options = array())
     $include_path . PATH_SEPARATOR . $rootdir
   );
 
-  @include_once 'phabricator/scripts/init/init-script.php';
+  @include_once 'phorge/scripts/init/init-script.php';
 
   $root = dirname(__FILE__) . '/../..';
   phutil_load_library($root);
   phutil_load_library('arcanist/src');
-  phutil_load_library('phabricator/src');
+  phutil_load_library('phorge/src');
 
   PhabricatorEnv::initializeScriptEnvironment(false);
 }
