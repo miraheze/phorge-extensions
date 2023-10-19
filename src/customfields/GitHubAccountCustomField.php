@@ -93,7 +93,7 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 		$value = $this->getFieldValue();
 
-		if ( strlen( $value ) ) {
+		if ( phutil_nonempty_string( $value ) ) {
 			$indexes[] = $this->newStringIndex( $value );
 			$indexes[] = $this->newStringIndex( urldecode( $this->getExternalAccount()->getAccountURI() ) );
 			$parts = explode( ' ', $value );
