@@ -132,7 +132,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 			// We gen this so we can check for replay below:
 			$nonce = Filesystem::readRandomCharacters( 32 );
 
-			list( $body ) = $this->newOAuth1Future( $uri )
+			[ $body ] = $this->newOAuth1Future( $uri )
 				->setMethod( 'GET' )
 				->setNonce( $nonce )
 				->addHeader( 'User-Agent', __CLASS__ )
@@ -205,7 +205,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 
 	/** decode a JWT and verify the signature is valid */
 	private function decodeJWT( $jwt ) {
-		list( $headb64, $bodyb64, $sigb64 ) = explode( '.', $jwt );
+		[ $headb64, $bodyb64, $sigb64 ] = explode( '.', $jwt );
 
 		$header = json_decode( $this->urlsafeB64Decode( $headb64 ) );
 		$body = json_decode( $this->urlsafeB64Decode( $bodyb64 ) );
