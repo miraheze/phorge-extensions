@@ -98,7 +98,7 @@ abstract class PhutilOpenstackFuture extends FutureProxy {
 				->setMethod( $method );
 
 			foreach ( $this->headers as $header ) {
-				list( $key, $value ) = $header;
+				[ $key, $value ] = $header;
 				$future->addHeader( $key, $value );
 			}
 
@@ -113,7 +113,7 @@ abstract class PhutilOpenstackFuture extends FutureProxy {
 	}
 
 	protected function didReceiveResult( $result ) {
-		list( $status, $body, $headers ) = $result;
+		[ $status, $body, $headers ] = $result;
 
 		try {
 			// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged

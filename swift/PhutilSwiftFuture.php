@@ -67,7 +67,7 @@ final class PhutilSwiftFuture extends PhutilOpenstackFuture {
 	}
 
 	protected function didReceiveResult( $result ) {
-		list( $status, $body, $headers ) = $result;
+		[ $status, $body, $headers ] = $result;
 
 		if ( !$status->isError() ) {
 			return $body;
