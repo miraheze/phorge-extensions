@@ -143,7 +143,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 		$key_secret = self::PROPERTY_CONSUMER_SECRET;
 		$key_consumer = self::PROPERTY_CONSUMER_KEY;
 
-		if ( $values[$key_uri] === null || $values[$key_uri] === '' )
+		if ( $values[$key_uri] === null || $values[$key_uri] === '' ) {
 			$errors[] = pht( 'MediaWiki base URI is required.' );
 			$issues[$key_uri] = pht( 'Required' );
 		} else {
