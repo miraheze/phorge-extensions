@@ -46,7 +46,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 	public function getAccountURI() {
 		$name = $this->getAccountName();
 
-		if ( strlen( $name ) ) {
+		if ( $name !== null && $name !== '' ) {
 			return $this->getWikiPageURI( 'User:' . $name );
 		}
 
