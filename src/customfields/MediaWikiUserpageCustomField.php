@@ -124,7 +124,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 		PhabricatorCursorPagedPolicyAwareQuery $query,
 		$value
 	) {
-		if ( strlen( $value ) ) {
+		if ( strlen( $value ?? '' ) ) {
 			$query->withApplicationSearchContainsConstraint(
 				$this->newStringIndex( null ),
 				$value
