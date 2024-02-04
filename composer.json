@@ -1,5 +1,5 @@
 {
-	"name": "miraheze/phabricator-extensions",
+	"name": "miraheze/phorge-extensions",
 	"description": "",
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "42.0.0",
