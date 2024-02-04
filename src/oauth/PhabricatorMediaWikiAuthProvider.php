@@ -96,7 +96,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 				"\n\n" .
 				"After you register the consumer, a **Consumer Key** and " .
 				"**Consumer Secret** will be provided to you by MediaWiki. " .
-				"To complete configuration of phorge, copy the provided keys into " .
+				"To complete configuration of Phorge, copy the provided keys into " .
 				"the corresponding fields above." .
 				"\n\n" .
 				"NOTE: Before Phorge can successfully authenticate to your MediaWiki," .
