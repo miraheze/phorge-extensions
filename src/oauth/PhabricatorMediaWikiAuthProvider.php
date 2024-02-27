@@ -1,7 +1,5 @@
 <?php
 
-// Source: https://raw.githubusercontent.com/wikimedia/phabricator-extensions/wmf/stable/src/oauth/PhabricatorMediaWikiAuthProvider.php
-
 final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvider {
 	public const PROPERTY_MEDIAWIKI_NAME = 'oauth1:mediawiki:name';
 	public const PROPERTY_MEDIAWIKI_URI = 'oauth1:mediawiki:uri';
