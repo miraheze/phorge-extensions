@@ -9,7 +9,7 @@ $root = dirname( __DIR__ );
 require_once $root . '/scripts/init/init-script.php';
 init_script();
 $args = new PhutilArgumentParser( $argv );
-$args->setTagline( pht( 'Phabricator transaction rollback tool.' ) );
+$args->setTagline( pht( 'Phorge transaction rollback tool.' ) );
 $args->setSynopsis( <<<EOSYNOPSIS
 **rollback** __workflow__ [__options__]
     Roll back transactions
