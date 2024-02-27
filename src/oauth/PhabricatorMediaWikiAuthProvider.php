@@ -214,7 +214,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 				pht(
 					"**MediaWiki Instance Name**\n\n" .
 					"Choose a permanent name for this instance of MediaWiki." .
-					"Phabricator uses this name internally to keep track of " .
+					"Phorge uses this name internally to keep track of " .
 					"this instance of MediaWiki, in case the URL changes later." .
 					"\n\n" .
 					"Use lowercase letters, digits, and period. For example: " .
