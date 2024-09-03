@@ -12,7 +12,7 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 	}
 
 	public function getFieldName() {
-		return pht( "GitHub User" );
+		return pht( 'GitHub User' );
 	}
 
 	public function getFieldValue() {
@@ -24,11 +24,11 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 		$uri = urldecode( $account->getAccountURI() );
 
-		// Split on the User: part of the userpage uri
-		$name = explode( "github.com/", $uri );
-		// grab the part after User:
+		// Split on the User: part of the userpage URI
+		$name = explode( 'github.com/', $uri );
+		// Grab the part after User:
 		$name = array_pop( $name );
-		// decode for display:
+		// Decode for display:
 		$name = urldecode( rawurldecode( $name ) );
 
 		return $name;
@@ -64,11 +64,11 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 
 		$uri = urldecode( $account->getAccountURI() );
 
-		// Split on the User: part of the userpage uri
-		$name = explode( "github.com/", $uri );
-		// grab the part after User:
+		// Split on the User: part of the userpage URI
+		$name = explode( 'github.com/', $uri );
+		// Grab the part after User:
 		$name = array_pop( $name );
-		// decode for display:
+		// Decode for display:
 		$name = urldecode( rawurldecode( $name ) );
 
 		return phutil_tag(
