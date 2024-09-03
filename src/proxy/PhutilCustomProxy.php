@@ -4,7 +4,7 @@ class PhutilCustomProxy extends PhutilHTTPEngineExtension {
 	public const EXTENSIONKEY = 'CustomProxy';
 
 	public function getExtensionName() {
-		return 'CustomProxy';
+		return pht( 'CustomProxy' );
 	}
 
 	public function getHTTPProxyURI( PhutilURI $uri ) {
