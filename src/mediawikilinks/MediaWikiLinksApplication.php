@@ -19,7 +19,7 @@ final class MediaWikiLinksApplication extends PhabricatorApplication {
 
 	public function getTitleGlyph() {
 		return "\xEF\x83\x81";
-  	}
+	}
 
 	public function getApplicationGroup() {
 		return self::GROUP_UTILITIES;
@@ -29,5 +29,5 @@ final class MediaWikiLinksApplication extends PhabricatorApplication {
 		return [
 			new MediaWikiLinksRemarkupRule(),
 		];
-  	}
+	}
 }
