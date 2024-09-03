@@ -90,9 +90,10 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 	protected function getRequestTokenURI() {
 		$callback = $this->getCallbackURI();
 
-		return $this->getWikiPageURI( 'Special:OAuth/initiate',
-				[ 'oauth_callback' => $callback ]
-			);
+		return $this->getWikiPageURI(
+			'Special:OAuth/initiate',
+			[ 'oauth_callback' => $callback ]
+		);
 	}
 
 	protected function getAuthorizeTokenURI() {
@@ -246,7 +247,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 		$len = min( strlen( $hash1 ), strlen( $hash2 ) );
 
 		for ( $i = 0; $i < $len; $i++ ) {
-				$result |= ord( $hash1[$i] ) ^ ord( $hash2[$i] );
+			$result |= ord( $hash1[$i] ) ^ ord( $hash2[$i] );
 		}
 
 		// this is just a constant time compare of the two hash strings
