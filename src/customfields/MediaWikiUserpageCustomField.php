@@ -14,7 +14,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 	}
 
 	public function getFieldName() {
-		return pht( "Miraheze User" );
+		return pht( 'Miraheze User' );
 	}
 
 	public function getFieldValue() {
@@ -26,11 +26,11 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 
 		$uri = urldecode( $account->getAccountURI() );
 
-		// Split on the User: part of the userpage uri
+		// Split on the User: part of the userpage URI
 		$name = explode( 'User:', $uri );
-		// grab the part after User:
+		// Grab the part after User:
 		$name = array_pop( $name );
-		// decode for display:
+		// Decode for display:
 		$name = urldecode( rawurldecode( $name ) );
 
 		return $name;
@@ -66,15 +66,15 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 			$userpage_uri = urldecode( $account->getAccountURI() );
 		}
 
-		// Split on the User: part of the userpage uri
+		// Split on the User: part of the userpage URI
 		$name = explode( 'User:', $userpage_uri );
-		// grab the part after User:
+		// Grab the part after User:
 		$rawname = array_pop( $name );
-		// decode for display:
+		// Decode for display:
 		$name = urldecode( rawurldecode( $rawname ) );
-		$accounts_uri = [ 'href' =>
-				"https://meta.miraheze.org/wiki/Special:CentralAuth/" .
-				$rawname ];
+		$accounts_uri = [
+			'href' => 'https://meta.miraheze.org/wiki/Special:CentralAuth/' . $rawname,
+		];
 		$accounts_text = pht( 'Global Accounts' );
 		$userpage_uri = [ 'href' => $userpage_uri ];
 
