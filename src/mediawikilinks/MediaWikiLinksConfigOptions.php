@@ -29,7 +29,7 @@ final class MediaWikiLinksConfigOptions
 				->addExample( 'https://meta.miraheze.org/wiki/', pht( 'Miraheze Meta' ) )
 				->setDescription(
 					pht(
-						'URL prefix of where Wikitext-style links go to. The page will '.
+						'URL prefix of where Wikitext-style links go to. The page will ' .
 						'be appended to the URL.'
 					)
 				),
