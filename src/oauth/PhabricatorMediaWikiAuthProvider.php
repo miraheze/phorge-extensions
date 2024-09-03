@@ -79,7 +79,8 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 		if ( $this->isSetup() ) {
 			return pht(
 				"**Step 1 of 2**: Provide the name and URI for your MediaWiki install.\n\n" .
-				"In the next step, you will create an auth consumer in MediaWiki to be used by Phorge oauth." );
+				"In the next step, you will create an auth consumer in MediaWiki to be used by Phorge oauth."
+			);
 		} else {
 			$wiki_uri = $this->getWikiURI();
 
