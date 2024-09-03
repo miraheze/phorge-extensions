@@ -9,22 +9,22 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 	protected $deleteTransactions = false;
 
 	private $fieldMap = [
-		"title" => "title",
-		"name" => "title",
-		"description" => "description",
-		"core:subscribers" => "subscribers",
-		"core:subtype" => "subtype",
-		PhabricatorTransactions::TYPE_SUBTYPE => "subtype",
-		PhabricatorTransactions::TYPE_VIEW_POLICY => "viewPolicy",
-		PhabricatorTransactions::TYPE_EDIT_POLICY => "editPolicy",
-		"core:create" => null,
-		"core:comment" => "comment",
-		"reassign" => "ownerPHID",
-		"status" => "status",
+		'title' => 'title',
+		'name' => 'title',
+		'description' => 'description',
+		'core:subscribers' => 'subscribers',
+		'core:subtype' => 'subtype',
+		PhabricatorTransactions::TYPE_SUBTYPE => 'subtype',
+		PhabricatorTransactions::TYPE_VIEW_POLICY => 'viewPolicy',
+		PhabricatorTransactions::TYPE_EDIT_POLICY => 'editPolicy',
+		'core:create' => null,
+		'core:comment' => 'comment',
+		'reassign' => 'ownerPHID',
+		'status' => 'status',
 	];
 
 	protected $methodMap = [
-		"subscribers" => "attachSubscriberPHIDs",
+		'subscribers' => 'attachSubscriberPHIDs',
 	];
 
 	protected function didConstruct() {
@@ -113,12 +113,14 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 		}
 		if ( $targetUser->getIsAdmin() ) {
 			throw new Exception(
-				pht( 'You cannot roll back the activity of a privileged user.' ) );
+				pht( 'You cannot roll back the activity of a privileged user.' )
+			);
 		}
 
 		if ( !$targetUser->getIsDisabled() ) {
 			throw new Exception(
-				pht( 'You must disable the user before rolling back their activity' ) );
+				pht( 'You must disable the user before rolling back their activity' )
+			);
 		}
 		return $targetUser;
 	}
@@ -132,7 +134,7 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 			clog::$show_verbose = $args->getArg( 'verbose' );
 			$this->dryrun = $args->getArg( 'dryrun' );
 			$this->deleteTransactions = $args->getArg( 'delete' );
-			// clog::log($this->dryrun);
+			// clog::log( $this->dryrun );
 			$offset = (int)$args->getArg( 'offset' );
 			$limit = (int)$args->getArg( 'limit' );
 		} catch ( Exception $e ) {
@@ -141,14 +143,14 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 			return false;
 		}
 		$columns = [
-			"t.phid",
-			"t.objectPHID",
-			"t.dateCreated",
-			"t.transactionType",
-			"t.oldValue",
-			"t.newValue",
-			"t.metadata",
-			"c.content as commentText",
+			't.phid',
+			't.objectPHID',
+			't.dateCreated',
+			't.transactionType',
+			't.oldValue',
+			't.newValue',
+			't.metadata',
+			'c.content as commentText',
 		];
 
 		$objectQuery = new ManiphestTaskQuery();
@@ -257,7 +259,7 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 		$skipped = [];
 		$t = $instance->getMonogram();
 
-		clog::log( "Found <fg:yellow>" . count( $data['transactions'] ) . "</fg> transactions on __<fg:blue>$t</fg>__" );
+		clog::log( 'Found <fg:yellow>' . count( $data['transactions'] ) . "</fg> transactions on __<fg:blue>$t</fg>__" );
 		foreach ( $data['transactions'] as $trns ) {
 			$oldValue = $this->normalizeValue( $trns['oldValue'] );
 			$newValue = $this->normalizeValue( $trns['newValue'] );
@@ -270,27 +272,27 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 				$field = $data['metadata']['customfield:key'];
 			} else {
 				$field = null;
-				clog::verbose( "no field for type", $type );
+				clog::verbose( 'no field for type', $type );
 			}
 
 			if ( isset( $data['fields'][$field] ) ) {
 				$dbValue = $this->normalizeValue( $data['fields'][$field] );
-				// clog::log(array("fld" => $field, "old" => $oldValue, "new"=> $newValue, "obj" => $dbValue));
+				// clog::log( [ 'fld' => $field, 'old' => $oldValue, 'new' => $newValue, 'obj' => $dbValue ] );
 				if ( $newValue === $dbValue ) {
 					$data['fields'][$field] = $oldValue;
 					if ( $field == 'subscribers' ) {
 						$this->editSubscribers( $instance->getPHID(), $newValue, $oldValue );
 						$done[] = $trns;
 					} else {
-						// fields with unconventionally-named setters are mapped to a
+						// Fields with unconventionally-named setters are mapped to a
 						// method name by looking them up in the methodMap array
 						if ( isset( $this->methodMap[$field] ) ) {
 							$method = $this->methodMap[$field];
 						} else {
-							$method = "set" . ucfirst( $field );
+							$method = 'set' . ucfirst( $field );
 						}
-						// dynamically call the setter method for the edited field
-						// e.g $task->setPriority($oldPriority)
+						// Dynamically call the setter method for the edited field
+						// e.g $task->setPriority( $oldPriority )
 						call_user_func_array( [ $instance, $method ], [ $oldValue ] );
 						$done[] = $trns;
 					}
@@ -298,10 +300,11 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 					$skipped[] = $trns;
 					$console->writeErr(
 						" <fg:red>*</fg> Edit conflict: __<fg:yellow>%s</fg>__ was edited by someone else.\n",
-						$field );
+						$field
+					);
 				}
 			} elseif ( $field === null ) {
-				// ignore this transaction.
+				// Ignore this transaction.
 			} elseif ( $field == 'comment' ) {
 				$done[] = $trns;
 			} else {
@@ -329,7 +332,7 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 			clog::log( "Processed: <fg:green>$doneCount</fg>, Skipped: <fg:yellow>$skipCount</fg>" );
 			$toDelete = [];
 			foreach ( $done as $trns ) {
-				clog::verbose( " <fg:green>*</fg> " . $trns['phid'] );
+				clog::verbose( ' <fg:green>*</fg> ' . $trns['phid'] );
 				clog::verbose( $trns );
 				$toDelete[] = $trns['phid'];
 			}
@@ -343,14 +346,15 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 					$transactionClass = new ManiphestTransaction();
 					$connection = id( $transactionClass )->establishConnection( 'r' );
 					queryfx( $connection,
-						"DELETE FROM %R WHERE phid IN (%Ls)",
+						'DELETE FROM %R WHERE phid IN (%Ls)',
 						$transactionClass,
-						$toDelete );
+						$toDelete
+					);
 				}
 			}
 
 		}
-		clog::log( "----" );
+		clog::log( '----' );
 		return $data;
 	}
 
