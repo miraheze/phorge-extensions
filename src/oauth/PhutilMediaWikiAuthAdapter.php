@@ -97,7 +97,7 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 	}
 
 	protected function getAuthorizeTokenURI() {
-		return $this->getWikiPageURI( 'Special:OAuth/authorize' );
+		return $this->getWikiPageURI( 'Special:OAuth/authenticate' );
 	}
 
 	public function setAdapterDomain( $domain ) {
