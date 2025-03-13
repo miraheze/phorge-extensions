@@ -67,9 +67,8 @@ final class PhutilMediaWikiAuthAdapter extends PhutilOAuth1AuthAdapter {
 
 	public function getAccountEmail() {
 		$info = $this->getUserInfo();
-		return idx($info, 'email');
+		return idx( $info, 'email' );
 	}
-
 
 	public function getAdapterType() {
 		return 'mediawiki';
