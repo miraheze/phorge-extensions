@@ -246,7 +246,7 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 				$val = $origVal;
 			}
 		}
-		if ( is_string( $val ) && strlen( $val ) ) {
+		if ( is_string( $val ) && $val !== '' ) {
 			$val = trim( $val, '"' );
 		}
 		return $val;
