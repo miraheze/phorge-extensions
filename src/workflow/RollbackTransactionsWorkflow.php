@@ -268,7 +268,7 @@ class RollbackTransactionsWorkflow extends MirahezeCLIWorkflow {
 				$field = $this->fieldMap[$type];
 			} elseif ( isset( $data['fields'][$type] ) ) {
 				$field = $type;
-			} elseif ( $type == 'core:customfield' && isset( $metadata ) ) {
+			} elseif ( $type == 'core:customfield' && isset( $data['metadata'] ) ) {
 				$field = $data['metadata']['customfield:key'];
 			} else {
 				$field = null;
