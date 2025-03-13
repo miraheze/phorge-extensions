@@ -20,7 +20,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 	public function getFieldValue() {
 		$account = $this->getExternalAccount();
 
-		if ( !$account || !strlen( $account->getAccountURI() ) ) {
+		if ( !$account || $account->getAccountURI() === null || $account->getAccountURI() === '' ) {
 			return null;
 		}
 
@@ -60,7 +60,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 	public function renderPropertyViewValue( array $handles ) {
 		$account = $this->getExternalAccount();
 
-		if ( !$account || !strlen( $account->getAccountURI() ) ) {
+		if ( !$account || $account->getAccountURI() === null || $account->getAccountURI() === '' ) {
 			return pht( 'Unknown' );
 		} else {
 			$userpage_uri = urldecode( $account->getAccountURI() );
@@ -98,7 +98,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 		$indexes = [];
 
 		$value = $this->getFieldValue();
-		if ( strlen( $value ) ) {
+		if ( $value !== null && $value !== '' ) {
 			$indexes[] = $this->newStringIndex( $value );
 			$indexes[] = $this->newStringIndex( urldecode( $this->getExternalAccount()->getAccountURI() ) );
 			$parts = explode( ' ', $value );
@@ -124,7 +124,7 @@ final class MediaWikiUserpageCustomField extends PhabricatorUserCustomField {
 		PhabricatorCursorPagedPolicyAwareQuery $query,
 		$value
 	) {
-		if ( strlen( $value ?? '' ) ) {
+		if ( $value !== null && $value !== '' ) {
 			$query->withApplicationSearchContainsConstraint(
 				$this->newStringIndex( null ),
 				$value
