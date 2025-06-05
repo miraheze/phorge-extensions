@@ -8,6 +8,6 @@ class PhutilCustomProxy extends PhutilHTTPEngineExtension {
 	}
 
 	public function getHTTPProxyURI( PhutilURI $uri ) {
-		return new PhutilURI( 'http://bastion.wikitide.net:8080/' );
+		return new PhutilURI( 'http://bastion.fsslc.wtnet:8080/' );
 	}
 }
