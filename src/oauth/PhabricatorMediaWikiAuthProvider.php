@@ -299,6 +299,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 
 		// WMF SUL specific domains, see T376803
 		if ( $uri->getDomain() == 'meta.miraheze.org' ) {
+			$csp_actions[] = 'https://auth.miraheze.org/';
 			$csp_actions[] = 'https://login.miraheze.org/';
 		}
 
