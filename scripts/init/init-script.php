@@ -6,7 +6,7 @@
 
 function init_script(array $options = array())
 {
-  error_reporting(E_ALL | E_STRICT);
+  error_reporting(E_ALL);
   ini_set('display_errors', 1);
   $rootdir = dirname(__FILE__) . '/../../../../';
 
