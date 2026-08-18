@@ -49,7 +49,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 	}
 
 	public function getProviderName() {
-		return pht( 'MediaWiki' );
+		return pht( 'Miraheze' );
 	}
 
 	public function getWikiURI() {
