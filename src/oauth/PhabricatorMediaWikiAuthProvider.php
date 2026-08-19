@@ -121,7 +121,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 	}
 
 	public function newIconView() {
-    return id(new PHUIIconView())
+	return id(new PHUIIconView())
        ->setImage('/file/data/favxwmnsedvx3kkpokqy/PHID-FILE-spdbknnch4l2y4h6dhry/Miraheze_login2x.png');
 	}
 
