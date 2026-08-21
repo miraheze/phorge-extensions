@@ -180,7 +180,7 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 		$content = [ $icon_style, $button ];
 
 		foreach ( $params as $pair ) {
-			list( $key, $value ) = $pair;
+			[ $key, $value ] = $pair;
 			$content[] = phutil_tag(
 				'input',
 				[
