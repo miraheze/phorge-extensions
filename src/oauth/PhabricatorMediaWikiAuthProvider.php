@@ -125,6 +125,90 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 			->setImage( 'https://phorge-static.wikitide.net/file/data/favxwmnsedvx3kkpokqy/PHID-FILE-spdbknnch4l2y4h6dhry/Miraheze_login2x.png' );
 	}
 
+	protected function renderStandardLoginButton(
+		AphrontRequest $request,
+		$mode,
+		array $attributes = []
+	) {
+		PhutilTypeSpec::checkMap(
+			$attributes,
+			[
+				'method' => 'optional string',
+				'uri' => 'string',
+				'sigil' => 'optional string',
+			]
+		);
+
+		$viewer = $request->getUser();
+
+		if ( $mode == 'link' ) {
+			$button_text = pht( 'Link External Account' );
+		} elseif ( $mode == 'refresh' ) {
+			$button_text = pht( 'Refresh Account Link' );
+		} elseif ( $mode == 'invite' ) {
+			$button_text = pht( 'Register Account' );
+		} elseif ( $this->shouldAllowRegistration() ) {
+			$button_text = pht( 'Log In or Register' );
+		} else {
+			$button_text = pht( 'Log In' );
+		}
+
+		$icon = $this->newIconView()
+			->addClass( 'login-miraheze-icon' );
+
+		$button = id( new PHUIButtonView() )
+			->setSize( PHUIButtonView::BIG )
+			->setColor( PHUIButtonView::GREY )
+			->setIcon( $icon )
+			->setText( $button_text )
+			->setSubtext( $this->getProviderName() );
+
+		$icon_style = phutil_tag(
+			'style',
+			[],
+			'.phui-icon-view.login-miraheze-icon { ' .
+			'height: 28px; width: 28px; ' .
+			'background-size: 28px 28px; background-repeat: no-repeat; ' .
+			'}'
+		);
+
+		$uri = $attributes['uri'];
+		$uri = new PhutilURI( $uri );
+		$params = $uri->getQueryParamsAsPairList();
+		$uri->removeAllQueryParams();
+
+		$content = [ $icon_style, $button ];
+
+		foreach ( $params as $pair ) {
+			list( $key, $value ) = $pair;
+			$content[] = phutil_tag(
+				'input',
+				[
+					'type' => 'hidden',
+					'name' => $key,
+					'value' => $value,
+				]
+			);
+		}
+
+		$static_response = CelerityAPI::getStaticResourceResponse();
+		$static_response->addContentSecurityPolicyURI( 'form-action', (string)$uri );
+
+		foreach ( $this->getContentSecurityPolicyFormActions() as $csp_uri ) {
+			$static_response->addContentSecurityPolicyURI( 'form-action', $csp_uri );
+		}
+
+		return phabricator_form(
+			$viewer,
+			[
+				'method' => idx( $attributes, 'method', 'GET' ),
+				'action' => (string)$uri,
+				'sigil' => idx( $attributes, 'sigil' ),
+			],
+			$content
+		);
+	}
+
 	private function isSetup() {
 		return !$this->getProviderConfig()->getID();
 	}
