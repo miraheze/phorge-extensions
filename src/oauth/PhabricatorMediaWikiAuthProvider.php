@@ -13,6 +13,10 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 		return $config;
 	}
 
+	public function getLoginOrder() {
+		return '100-' . $this->getProviderName();
+	}
+
 	public function readFormValuesFromProvider() {
 		$config = $this->getProviderConfig();
 
