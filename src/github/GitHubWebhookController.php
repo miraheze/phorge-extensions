@@ -80,7 +80,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		}
 
 		// The signed payload only tells us where to look. Everything we act on comes from the API.
-		list( $code, $pull ) = $this->fetchGitHub( '/repos/' . $repository . '/pulls/' . $number );
+		[ $code, $pull ] = $this->fetchGitHub( '/repos/' . $repository . '/pulls/' . $number );
 		if ( $code === 404 ) {
 			return $this->newTextResponse( 200, 'ignored repository' );
 		}
@@ -106,7 +106,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			return $this->newTextResponse( 200, 'ignored action' );
 		}
 
-		list( $code, $commits ) = $this->fetchGitHub(
+		[ $code, $commits ] = $this->fetchGitHub(
 			'/repos/' . $repository . '/pulls/' . $number . '/commits?per_page=100'
 		);
 		if ( !is_array( $commits ) ) {
@@ -128,7 +128,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		if ( $is_merged ) {
 			$state = 'merged';
 			$actor = idxv( $pull, [ 'merged_by', 'login' ] );
-		} else if ( $is_closed ) {
+		} elseif ( $is_closed ) {
 			$state = 'closed';
 			$actor = idxv( $payload, [ 'sender', 'login' ] );
 		} else {
@@ -181,7 +181,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			return $this->newTextResponse( 200, 'no task references' );
 		}
 
-		list( $code, $repo_data ) = $this->fetchGitHub( '/repos/' . $repository );
+		[ $code, $repo_data ] = $this->fetchGitHub( '/repos/' . $repository );
 		if ( $code === 404 ) {
 			return $this->newTextResponse( 200, 'ignored repository' );
 		}
@@ -195,13 +195,13 @@ final class GitHubWebhookController extends PhabricatorController {
 
 		$updated = 0;
 		foreach ( array_slice( array_unique( $candidates ), 0, self::MAX_COMMITS ) as $sha ) {
-			list( $code, $commit ) = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha );
+			[ $code, $commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha );
 			if ( !is_array( $commit ) || idx( $commit, 'sha' ) !== $sha ) {
 				continue;
 			}
 
 			// Commits that arrived through a merged pull request are covered by the pull request event.
-			list( $code, $pulls ) = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha . '/pulls' );
+			[ $code, $pulls ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha . '/pulls' );
 			if ( !is_array( $pulls ) ) {
 				continue;
 			}
@@ -344,7 +344,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			$future->addHeader( 'Authorization', 'Bearer ' . $token );
 		}
 
-		list( $status, $body ) = $future->resolve();
+		[ $status, $body ] = $future->resolve();
 		$code = $status->getStatusCode();
 		if ( $status->isError() ) {
 			return [ $code, null ];
