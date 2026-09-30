@@ -101,6 +101,28 @@ final class GitHubPullRequestUtil extends Phobject {
 			idx( $value, 'title', '' );
 	}
 
+	// Single line description of the event without any markup.
+	public static function buildPlainSummary( array $value ) {
+		$actor = (string)idx( $value, 'actor', '' );
+		$author = (string)idx( $value, 'author', '' );
+		$number = (int)idx( $value, 'number', 0 );
+
+		if ( self::getKind( $value ) === self::KIND_COMMIT ) {
+			return 'Commit ' . self::getShortSha( $value['sha'] ) . ' pushed' .
+				( strlen( $author ) ? ' by ' . $author : '' );
+		}
+
+		switch ( idx( $value, 'state' ) ) {
+			case 'merged':
+				return 'Pull request #' . $number . ' merged' . ( strlen( $actor ) ? ' by ' . $actor : '' );
+			case 'closed':
+				return 'Pull request #' . $number . ' closed' .
+					( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging';
+			default:
+				return 'Pull request #' . $number . ' opened' . ( strlen( $author ) ? ' by ' . $author : '' );
+		}
+	}
+
 	public static function buildCommentBody( array $value ) {
 		$actor = (string)idx( $value, 'actor', '' );
 		$author = (string)idx( $value, 'author', '' );
