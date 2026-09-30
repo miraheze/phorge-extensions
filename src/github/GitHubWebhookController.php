@@ -268,6 +268,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			->execute();
 
 		$bot_phid = $this->getBotPHID();
+		$post_comments = (bool)PhabricatorEnv::getEnvConfig( 'github.post-comments' );
 		$acting_phid = $bot_phid ?: ( new GitHubIntegrationApplication() )->getPHID();
 		$key = GitHubPullRequestUtil::getStateKey( $value );
 
@@ -291,7 +292,7 @@ final class GitHubWebhookController extends PhabricatorController {
 				->setTransactionType( GitHubPullRequestTransaction::TRANSACTIONTYPE )
 				->setNewValue( $value );
 
-			if ( $bot_phid ) {
+			if ( $bot_phid && $post_comments ) {
 				$xactions[] = id( new ManiphestTransaction() )
 					->setTransactionType( PhabricatorTransactions::TYPE_COMMENT )
 					->attachComment(
