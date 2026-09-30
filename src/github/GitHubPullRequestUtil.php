@@ -67,6 +67,25 @@ final class GitHubPullRequestUtil extends Phobject {
 		return $repository . '#' . (int)$value['number'];
 	}
 
+	// True when a merged pull request on the task already accounts for this commit.
+	public static function isCoveredByMergedPull( array $states, array $value ) {
+		if ( self::getKind( $value ) !== self::KIND_COMMIT ) {
+			return false;
+		}
+
+		foreach ( $states as $state ) {
+			if (
+				self::getKind( $state ) === self::KIND_PULL &&
+				idx( $state, 'state' ) === 'merged' &&
+				idx( $state, 'merge_sha' ) === $value['sha']
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// Keeps stored text safe inside a remarkup literal on a single line.
 	public static function cleanInline( $text, $length = 240 ) {
 		$text = preg_replace( '/[\x00-\x1F\x7F]+/', ' ', (string)$text );
