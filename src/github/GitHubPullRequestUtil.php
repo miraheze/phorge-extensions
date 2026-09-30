@@ -110,12 +110,67 @@ final class GitHubPullRequestUtil extends Phobject {
 		return $head . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
 	}
 
+	public static function getKeywordMap() {
+		$map = ManiphestTaskStatus::getStatusPrefixMap();
+		$closed = ManiphestTaskStatus::getDefaultClosedStatus();
+
+		$builtin = [ 'close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved' ];
+		foreach ( $builtin as $keyword ) {
+			if ( !array_key_exists( $keyword, $map ) ) {
+				$map[$keyword] = $closed;
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Finds the active user who linked the given GitHub account, if any.
+	 */
+	public static function loadUserForGitHubID( $github_id ) {
+		$github_id = (string)$github_id;
+		if ( !preg_match( '/^[1-9]\d{0,19}$/', $github_id ) ) {
+			return null;
+		}
+
+		$viewer = PhabricatorUser::getOmnipotentUser();
+
+		$configs = id( new PhabricatorAuthProviderConfigQuery() )
+			->setViewer( $viewer )
+			->withProviderClasses( [ PhabricatorGitHubAuthProvider::class ] )
+			->execute();
+		if ( !$configs ) {
+			return null;
+		}
+
+		$accounts = id( new PhabricatorExternalAccountQuery() )
+			->setViewer( $viewer )
+			->withProviderConfigPHIDs( mpull( $configs, 'getPHID' ) )
+			->withRawAccountIdentifiers( [ $github_id ] )
+			->execute();
+
+		$user_phids = array_unique( array_filter( mpull( $accounts, 'getUserPHID' ) ) );
+		if ( count( $user_phids ) !== 1 ) {
+			return null;
+		}
+
+		$user = id( new PhabricatorPeopleQuery() )
+			->setViewer( $viewer )
+			->withPHIDs( $user_phids )
+			->executeOne();
+		if ( !$user || $user->getIsSystemAgent() || !$user->isUserActivated() ) {
+			return null;
+		}
+
+		return $user;
+	}
+
 	/**
 	 * Returns a map of task ID to the status the reference asks for.
 	 * References that only link a task map to null.
 	 */
 	public static function parseTaskReferences( $corpus ) {
-		$prefix_map = ManiphestTaskStatus::getStatusPrefixMap();
+		$prefix_map = self::getKeywordMap();
 		$prefixes = array_keys( $prefix_map );
 		foreach ( [ 'bug', 'bugs', 'task', 'tasks', 'issue', 'issues' ] as $extra ) {
 			$prefixes[] = $extra;
