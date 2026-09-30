@@ -41,6 +41,21 @@ final class GitHubIntegrationConfigOptions
 						'Only needed if the unauthenticated rate limit is too low.'
 					)
 				),
+			$this->newOption( 'github.post-comments', 'bool', true )
+				->setBoolOptions(
+					[
+						pht( 'Post a bot comment for each event' ),
+						pht( 'Notify through the timeline entry instead' ),
+					]
+				)
+				->setDescription(
+					pht(
+						'When enabled, a bot comment is posted for each event and the ' .
+						'timeline entry stays quiet. When disabled, no comment is posted ' .
+						'and the timeline entry itself sends mail, notifications and ' .
+						'feed stories.'
+					)
+				),
 			$this->newOption( 'github.bot-username', 'string', null )
 				->addExample( 'GitHubBot', pht( 'Bot account' ) )
 				->setDescription(
