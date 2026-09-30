@@ -18,6 +18,7 @@ final class GitHubWebhookController extends PhabricatorController {
 
 	private $botPHID = false;
 	private $assignees = [];
+	private $lastFailure = '';
 
 	public function shouldRequireLogin() {
 		return false;
@@ -89,7 +90,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			return $this->newTextResponse( 200, 'ignored repository' );
 		}
 		if ( !is_array( $pull ) ) {
-			return $this->newTextResponse( 502, 'could not read pull request' );
+			return $this->newTextResponse( 502, 'could not read pull request: ' . $this->lastFailure );
 		}
 
 		$base_repo = idxv( $pull, [ 'base', 'repo' ], [] );
@@ -114,7 +115,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			'/repos/' . $repository . '/pulls/' . $number . '/commits?per_page=100'
 		);
 		if ( !is_array( $commits ) ) {
-			return $this->newTextResponse( 502, 'could not read commits' );
+			return $this->newTextResponse( 502, 'could not read commits: ' . $this->lastFailure );
 		}
 
 		$corpus = [ (string)idx( $pull, 'title', '' ), (string)idx( $pull, 'body', '' ) ];
@@ -198,12 +199,12 @@ final class GitHubWebhookController extends PhabricatorController {
 		if ( $code === 404 ) {
 			return $this->newTextResponse( 200, 'ignored repository' );
 		}
-		if (
-			!is_array( $repo_data ) ||
-			idx( $repo_data, 'private' ) !== false ||
-			$branch !== idx( $repo_data, 'default_branch' )
-		) {
-			return $this->newTextResponse( $repo_data ? 200 : 502, 'ignored repository' );
+		if ( !is_array( $repo_data ) ) {
+			return $this->newTextResponse( 502, 'could not read repository: ' . $this->lastFailure );
+		}
+
+		if ( idx( $repo_data, 'private' ) !== false || $branch !== idx( $repo_data, 'default_branch' ) ) {
+			return $this->newTextResponse( 200, 'ignored repository' );
 		}
 
 		sleep( self::PUSH_SETTLE_SECONDS );
@@ -386,9 +387,14 @@ final class GitHubWebhookController extends PhabricatorController {
 			$future->addHeader( 'Authorization', 'Bearer ' . $token );
 		}
 
-		[ $status, $body ] = $future->resolve();
+		[ $status, $body, $headers ] = $future->resolve();
 		$code = $status->getStatusCode();
 		if ( $status->isError() ) {
+			$this->lastFailure = GitHubPullRequestUtil::cleanInline(
+				$status->getMessage() . $this->describeRateLimit( $headers ),
+				300
+			);
+			phlog( 'GitHub webhook request failed: ' . $this->lastFailure );
 			return [ $code, null ];
 		}
 
@@ -397,6 +403,16 @@ final class GitHubWebhookController extends PhabricatorController {
 		} catch ( PhutilJSONParserException $ex ) {
 			return [ $code, null ];
 		}
+	}
+
+	private function describeRateLimit( array $headers ) {
+		foreach ( $headers as $header ) {
+			if ( strtolower( (string)idx( $header, 0 ) ) === 'x-ratelimit-remaining' ) {
+				return ' (rate limit remaining: ' . (string)idx( $header, 1 ) . ')';
+			}
+		}
+
+		return '';
 	}
 
 	private function newTextResponse( $code, $text ) {
