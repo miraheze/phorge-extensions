@@ -8,12 +8,45 @@ final class GitHubPullRequestTransaction extends ManiphestTaskTransactionType {
 		return null;
 	}
 
+	// Notifications come from the bot comment when comments are enabled.
 	public function shouldHideForMail() {
-		return true;
+		return $this->usesComments();
 	}
 
 	public function shouldHideForFeed() {
-		return true;
+		return $this->usesComments();
+	}
+
+	public function shouldHideForNotifications() {
+		return $this->usesComments();
+	}
+
+	private function usesComments() {
+		return (bool)PhabricatorEnv::getEnvConfig( 'github.post-comments' );
+	}
+
+	protected function getTitleForMail() {
+		$value = $this->getNewValue();
+		if ( !is_array( $value ) || !GitHubPullRequestUtil::isValidValue( $value ) ) {
+			return pht( 'A change was linked to this task.' );
+		}
+
+		return GitHubPullRequestUtil::buildPlainSummary( $value ) . ': ' .
+			GitHubPullRequestUtil::buildSubjectLine( $value ) .
+			' (' . GitHubPullRequestUtil::getURI( $value ) . ')';
+	}
+
+	public function getTitleForFeed() {
+		$value = $this->getNewValue();
+		if ( !is_array( $value ) || !GitHubPullRequestUtil::isValidValue( $value ) ) {
+			return null;
+		}
+
+		return pht(
+			'%s on %s.',
+			GitHubPullRequestUtil::buildPlainSummary( $value ),
+			$this->renderObject()
+		);
 	}
 
 	public function getIcon() {
