@@ -13,6 +13,9 @@ final class GitHubWebhookController extends PhabricatorController {
 
 	private const MAX_COMMITS = 10;
 
+	// GitHub sends the push and the pull request events together, and its API lags slightly behind both.
+	private const PUSH_SETTLE_SECONDS = 3;
+
 	private $botPHID = false;
 	private $assignees = [];
 
@@ -155,6 +158,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			'author' => GitHubPullRequestUtil::isValidLogin( $author ) ? $author : '',
 			'actor' => GitHubPullRequestUtil::isValidLogin( $actor ) ? $actor : '',
 			'state' => $state,
+			'merge_sha' => $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ? $merge_sha : '',
 		];
 
 		$resolves = $state === 'merged' &&
@@ -202,6 +206,8 @@ final class GitHubWebhookController extends PhabricatorController {
 			return $this->newTextResponse( $repo_data ? 200 : 502, 'ignored repository' );
 		}
 
+		sleep( self::PUSH_SETTLE_SECONDS );
+
 		$updated = 0;
 		foreach ( array_slice( array_unique( $candidates ), 0, self::MAX_COMMITS ) as $sha ) {
 			[ $code, $commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha );
@@ -217,7 +223,7 @@ final class GitHubWebhookController extends PhabricatorController {
 
 			$from_pull = false;
 			foreach ( $pulls as $pull ) {
-				if ( is_array( $pull ) && idx( $pull, 'merged_at' ) ) {
+				if ( is_array( $pull ) && ( idx( $pull, 'merged_at' ) || idx( $pull, 'merge_commit_sha' ) === $sha ) ) {
 					$from_pull = true;
 					break;
 				}
@@ -268,8 +274,13 @@ final class GitHubWebhookController extends PhabricatorController {
 		$updated = 0;
 
 		foreach ( $tasks as $task ) {
-			$last = idx( GitHubPullRequestUtil::loadLatestStates( $viewer, $task ), $key );
+			$states = GitHubPullRequestUtil::loadLatestStates( $viewer, $task );
+			$last = idx( $states, $key );
 			if ( $last && idx( $last, 'state' ) === $value['state'] ) {
+				continue;
+			}
+
+			if ( GitHubPullRequestUtil::isCoveredByMergedPull( $states, $value ) ) {
 				continue;
 			}
 
