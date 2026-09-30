@@ -18,10 +18,6 @@ final class GitHubIntegrationApplication extends PhabricatorApplication {
 		return self::GROUP_UTILITIES;
 	}
 
-	public function isLaunchable() {
-		return false;
-	}
-
 	public function getRoutes() {
 		return [
 			'/github/' => [
