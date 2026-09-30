@@ -1,5 +1,4 @@
 <?php
-
 final class GitHubIntegrationApplication extends PhabricatorApplication {
 
 	public function getName() {
