@@ -41,7 +41,7 @@ final class GitHubIntegrationConfigOptions
 						'Only needed if the unauthenticated rate limit is too low.'
 					)
 				),
-			$this->newOption( 'github.post-comments', 'bool', true )
+			$this->newOption( 'github.post-comments', 'bool', false )
 				->setBoolOptions(
 					[
 						pht( 'Post a bot comment for each event' ),
