@@ -14,6 +14,7 @@ final class GitHubWebhookController extends PhabricatorController {
 	private const MAX_COMMITS = 10;
 
 	private $botPHID = false;
+	private $assignees = [];
 
 	public function shouldRequireLogin() {
 		return false;
@@ -120,6 +121,14 @@ final class GitHubWebhookController extends PhabricatorController {
 			}
 		}
 
+		$merge_sha = (string)idx( $pull, 'merge_commit_sha', '' );
+		if ( $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ) {
+			[ $code, $merge_commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $merge_sha );
+			if ( is_array( $merge_commit ) && idx( $merge_commit, 'sha' ) === $merge_sha ) {
+				$corpus[] = (string)idxv( $merge_commit, [ 'commit', 'message' ], '' );
+			}
+		}
+
 		$references = GitHubPullRequestUtil::parseTaskReferences( implode( "\n\n", $corpus ) );
 		if ( !$references ) {
 			return $this->newTextResponse( 200, 'no task references' );
@@ -151,7 +160,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		$resolves = $state === 'merged' &&
 			idxv( $pull, [ 'base', 'ref' ] ) === idx( $base_repo, 'default_branch' );
 
-		$updated = $this->applyToTasks( $request, $references, $value, $resolves );
+		$updated = $this->applyToTasks( $request, $references, $value, $resolves, idxv( $pull, [ 'user', 'id' ] ) );
 
 		return $this->newTextResponse( 200, 'updated ' . $updated );
 	}
@@ -238,13 +247,13 @@ final class GitHubWebhookController extends PhabricatorController {
 				'state' => 'committed',
 			];
 
-			$updated += $this->applyToTasks( $request, $references, $value, true );
+			$updated += $this->applyToTasks( $request, $references, $value, true, idxv( $commit, [ 'author', 'id' ] ) );
 		}
 
 		return $this->newTextResponse( 200, 'updated ' . $updated );
 	}
 
-	private function applyToTasks( AphrontRequest $request, array $references, array $value, $resolves ) {
+	private function applyToTasks( AphrontRequest $request, array $references, array $value, $resolves, $github_id = null ) {
 		$viewer = PhabricatorUser::getOmnipotentUser();
 		$tasks = id( new ManiphestTaskQuery() )
 			->setViewer( $viewer )
@@ -290,6 +299,19 @@ final class GitHubWebhookController extends PhabricatorController {
 				$xactions[] = id( new ManiphestTransaction() )
 					->setTransactionType( ManiphestTaskStatusTransaction::TRANSACTIONTYPE )
 					->setNewValue( $status );
+
+				// Only unassigned tasks are claimed, so existing owners are never replaced.
+				if ( ManiphestTaskStatus::isClosedStatus( $status ) && !$task->getOwnerPHID() ) {
+					$assignee = $this->getAssignee( $github_id );
+					if (
+						$assignee &&
+						PhabricatorPolicyFilter::hasCapability( $assignee, $task, PhabricatorPolicyCapability::CAN_VIEW )
+					) {
+						$xactions[] = id( new ManiphestTransaction() )
+							->setTransactionType( ManiphestTaskOwnerTransaction::TRANSACTIONTYPE )
+							->setNewValue( $assignee->getPHID() );
+					}
+				}
 			}
 
 			try {
@@ -309,6 +331,15 @@ final class GitHubWebhookController extends PhabricatorController {
 		unset( $unguarded );
 
 		return $updated;
+	}
+
+	private function getAssignee( $github_id ) {
+		$key = (string)$github_id;
+		if ( !array_key_exists( $key, $this->assignees ) ) {
+			$this->assignees[$key] = GitHubPullRequestUtil::loadUserForGitHubID( $github_id );
+		}
+
+		return $this->assignees[$key];
 	}
 
 	private function getBotPHID() {
