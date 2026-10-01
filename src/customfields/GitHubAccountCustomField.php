@@ -59,7 +59,7 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 		$account = $this->getExternalAccount();
 
 		if ( !$account || !strlen( $account->getAccountURI() ) ) {
-			return pht( 'Unknown' );
+			return $this->renderLinkHint();
 		}
 
 		$uri = urldecode( $account->getAccountURI() );
@@ -78,6 +78,26 @@ final class GitHubAccountCustomField extends PhabricatorUserCustomField {
 			],
 			$name
 		);
+	}
+
+	private function renderLinkHint() {
+		$viewer = $this->getViewer();
+		$user = $this->getObject();
+
+		if ( !$viewer->isLoggedIn() || $viewer->getPHID() !== $user->getPHID() ) {
+			return pht( 'Unknown' );
+		}
+
+		$uri = GitHubPullRequestUtil::loadLinkURI( $viewer );
+		if ( !$uri ) {
+			return pht( 'Unknown' );
+		}
+
+		return [
+			pht( 'Not linked. ' ),
+			phutil_tag( 'a', [ 'href' => $uri ], pht( 'Link your GitHub account' ) ),
+			pht( ' to get tasks assigned to you when your fixes are merged.' ),
+		];
 	}
 
 	public function shouldAppearInApplicationSearch() {

@@ -129,6 +129,41 @@ final class GitHubPullRequestUtil extends Phobject {
 		return $head . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
 	}
 
+	public static function loadLinkURI( PhabricatorUser $viewer ) {
+		if ( !$viewer->isLoggedIn() ) {
+			return null;
+		}
+
+		$configs = id( new PhabricatorAuthProviderConfigQuery() )
+			->setViewer( $viewer )
+			->withProviderClasses( [ PhabricatorGitHubAuthProvider::class ] )
+			->withIsEnabled( true )
+			->execute();
+
+		$linkable = [];
+		foreach ( $configs as $config ) {
+			$provider = $config->getProvider();
+			if ( $provider && $provider->shouldAllowAccountLink() ) {
+				$linkable[] = $config;
+			}
+		}
+
+		if ( !$linkable ) {
+			return null;
+		}
+
+		$accounts = id( new PhabricatorExternalAccountQuery() )
+			->setViewer( $viewer )
+			->withUserPHIDs( [ $viewer->getPHID() ] )
+			->withProviderConfigPHIDs( mpull( $linkable, 'getPHID' ) )
+			->execute();
+		if ( $accounts ) {
+			return null;
+		}
+
+		return '/auth/link/' . head( $linkable )->getID() . '/';
+	}
+
 	public static function getKeywordMap() {
 		$map = ManiphestTaskStatus::getStatusPrefixMap();
 		$closed = ManiphestTaskStatus::getDefaultClosedStatus();

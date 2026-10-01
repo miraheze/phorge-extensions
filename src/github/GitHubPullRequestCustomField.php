@@ -52,9 +52,25 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 			];
 		}
 
-		return id( new AphrontTableView( $rows ) )
+		$table = id( new AphrontTableView( $rows ) )
 			->setHeaders( [ pht( 'Subject' ), pht( 'Author' ), pht( 'Status' ) ] )
 			->setColumnClasses( [ 'wide pri', '', '' ] );
+
+		$uri = GitHubPullRequestUtil::loadLinkURI( $this->getViewer() );
+		if ( !$uri ) {
+			return $table;
+		}
+
+		$hint = phutil_tag(
+			'div',
+			[ 'style' => 'margin-top: 8px; color: #6b748c;' ],
+			[
+				phutil_tag( 'a', [ 'href' => $uri ], pht( 'Link your GitHub account' ) ),
+				pht( ' to get tasks assigned to you when your fixes are merged.' ),
+			]
+		);
+
+		return [ $table, $hint ];
 	}
 
 	private function renderStatus( array $state ) {
