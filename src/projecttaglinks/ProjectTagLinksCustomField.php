@@ -1,11 +1,6 @@
 <?php
 
 final class ProjectTagLinksCustomField extends ManiphestCustomField {
-	private const VISIBILITY_PUBLIC = 'public';
-	private const VISIBILITY_LOGIN = 'login';
-	private const VISIBILITY_PROJECTS = 'projects';
-
-	private array $memberKeys;
 
 	public function shouldUseStorage() {
 		return false;
@@ -33,56 +28,39 @@ final class ProjectTagLinksCustomField extends ManiphestCustomField {
 			return null;
 		}
 
-		$config = $this->loadLinkConfig();
-		if ( !$config ) {
+		$util = new ProjectTagLinksUtil( $this->getViewer() );
+		if ( !$util->hasAnyConfig() ) {
 			return null;
 		}
 
-		$tag_keys = $this->loadTagKeys( $task );
-		if ( !$tag_keys ) {
+		$projects = $this->loadTaskProjects( $task );
+		if ( !$projects ) {
 			return null;
 		}
 
-		$default_access = $this->parseAccess(
-			PhabricatorEnv::getEnvConfig( 'projecttaglinks.default-access' ),
-			$this->newAccess( self::VISIBILITY_PUBLIC )
-		);
+		$column_names = $util->usesColumns() ? $this->loadColumnNames( $task, $projects ) : [];
 
 		$candidates = [];
-		foreach ( $config as $key => $entries ) {
-			if ( !$this->hasKey( $tag_keys, $key ) ) {
-				continue;
-			}
-
-			foreach ( $entries as $label => $entry ) {
-				$candidate = $this->buildCandidate( (string)$label, $entry, $default_access );
-				if ( $candidate !== null ) {
-					$candidates[] = $candidate;
-				}
-			}
+		foreach ( $projects as $project ) {
+			$candidates = array_merge(
+				$candidates,
+				$util->collectProjectLinks(
+					$util->getProjectKeys( $project ),
+					$column_names[$project->getPHID()] ?? []
+				)
+			);
 		}
-
-		if ( !$candidates ) {
-			return null;
-		}
-
-		$this->loadMemberKeys( $candidates );
 
 		$links = [];
-		foreach ( $candidates as $candidate ) {
-			$uri = $candidate['uri'];
-			if ( isset( $links[$uri] ) || !$this->canView( $candidate['access'] ) ) {
-				continue;
-			}
-
-			$links[$uri] = phutil_tag(
+		foreach ( $util->filterVisible( $candidates ) as $link ) {
+			$links[] = phutil_tag(
 				'a',
 				[
-					'href' => $uri,
+					'href' => $link['uri'],
 					'target' => '_blank',
 					'rel' => 'noreferrer',
 				],
-				$candidate['label']
+				$link['label']
 			);
 		}
 
@@ -90,165 +68,10 @@ final class ProjectTagLinksCustomField extends ManiphestCustomField {
 			return null;
 		}
 
-		return phutil_implode_html( phutil_tag( 'br' ), array_values( $links ) );
+		return phutil_implode_html( phutil_tag( 'br' ), $links );
 	}
 
-	private function buildCandidate( $label, $entry, array $default_access ) {
-		if ( is_string( $entry ) ) {
-			$target = $entry;
-			$access = $default_access;
-		} elseif ( is_array( $entry ) ) {
-			$target = $entry['url'] ?? null;
-			$access = $this->parseAccess( $entry, $default_access );
-		} else {
-			return null;
-		}
-
-		$uri = $this->resolveTarget( $target );
-		if ( $uri === null ) {
-			return null;
-		}
-
-		return [
-			'label' => $label,
-			'uri' => $uri,
-			'access' => $access,
-		];
-	}
-
-	private function loadLinkConfig() {
-		$raw = PhabricatorEnv::getEnvConfig( 'projecttaglinks.links' );
-		if ( !is_array( $raw ) ) {
-			return [];
-		}
-
-		$config = [];
-		foreach ( $raw as $tag => $entries ) {
-			if ( !is_array( $entries ) ) {
-				continue;
-			}
-
-			$key = $this->normalizeKey( $tag );
-			if ( $key === '' ) {
-				continue;
-			}
-
-			$config[$key] = array_merge( $config[$key] ?? [], $entries );
-		}
-
-		return $config;
-	}
-
-	private function newAccess( $visibility, array $projects = [] ) {
-		return [
-			'visibility' => $visibility,
-			'projects' => $projects,
-		];
-	}
-
-	private function parseAccess( $spec, array $fallback ) {
-		if ( !is_array( $spec ) ) {
-			return $fallback;
-		}
-
-		$visibility = $spec['visibility'] ?? null;
-		$projects = $spec['projects'] ?? null;
-
-		if ( $visibility === null && $projects === null ) {
-			return $fallback;
-		}
-
-		if ( $visibility === null ) {
-			$visibility = self::VISIBILITY_PROJECTS;
-		}
-
-		$visibility = is_string( $visibility ) ? $this->normalizeKey( $visibility ) : '';
-
-		if ( $visibility === self::VISIBILITY_PUBLIC || $visibility === self::VISIBILITY_LOGIN ) {
-			return $this->newAccess( $visibility );
-		}
-
-		if ( $visibility !== self::VISIBILITY_PROJECTS ) {
-			return $this->newAccess( self::VISIBILITY_PROJECTS );
-		}
-
-		if ( is_string( $projects ) ) {
-			$projects = [ $projects ];
-		}
-
-		if ( !is_array( $projects ) ) {
-			return $this->newAccess( self::VISIBILITY_PROJECTS );
-		}
-
-		$names = [];
-		foreach ( $projects as $project ) {
-			if ( is_string( $project ) && $this->normalizeKey( $project ) !== '' ) {
-				$names[] = trim( $project );
-			}
-		}
-
-		return $this->newAccess( self::VISIBILITY_PROJECTS, $names );
-	}
-
-	private function canView( array $access ) {
-		switch ( $access['visibility'] ) {
-			case self::VISIBILITY_PUBLIC:
-				return true;
-			case self::VISIBILITY_LOGIN:
-				return $this->getViewer()->isLoggedIn();
-			case self::VISIBILITY_PROJECTS:
-				foreach ( $access['projects'] as $name ) {
-					if ( $this->hasKey( $this->memberKeys ?? [], $name ) ) {
-						return true;
-					}
-				}
-				return false;
-			default:
-				return false;
-		}
-	}
-
-	private function loadMemberKeys( array $candidates ) {
-		$this->memberKeys = [];
-
-		$viewer = $this->getViewer();
-		if ( !$viewer->isLoggedIn() ) {
-			return;
-		}
-
-		$names = [];
-		foreach ( $candidates as $candidate ) {
-			if ( $candidate['access']['visibility'] === self::VISIBILITY_PROJECTS ) {
-				foreach ( $candidate['access']['projects'] as $name ) {
-					$names[$name] = $name;
-				}
-			}
-		}
-
-		if ( !$names ) {
-			return;
-		}
-
-		$names = array_values( $names );
-		$by_name = id( new PhabricatorProjectQuery() )
-			->setViewer( $viewer )
-			->withNames( $names )
-			->needSlugs( true )
-			->execute();
-		$by_slug = id( new PhabricatorProjectQuery() )
-			->setViewer( $viewer )
-			->withSlugs( $names )
-			->needSlugs( true )
-			->execute();
-
-		foreach ( array_merge( $by_name, $by_slug ) as $project ) {
-			if ( $project->isUserMember( $viewer->getPHID() ) ) {
-				$this->memberKeys += $this->buildProjectKeys( $project );
-			}
-		}
-	}
-
-	private function loadTagKeys( ManiphestTask $task ) {
+	private function loadTaskProjects( ManiphestTask $task ) {
 		$project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
 			$task->getPHID(),
 			PhabricatorProjectObjectHasProjectEdgeType::EDGECONST
@@ -258,81 +81,63 @@ final class ProjectTagLinksCustomField extends ManiphestCustomField {
 			return [];
 		}
 
-		$projects = id( new PhabricatorProjectQuery() )
+		return id( new PhabricatorProjectQuery() )
 			->setViewer( $this->getViewer() )
 			->withPHIDs( $project_phids )
 			->needSlugs( true )
 			->execute();
+	}
 
-		$keys = [];
+	private function loadColumnNames( ManiphestTask $task, array $projects ) {
+		$boards = [];
 		foreach ( $projects as $project ) {
-			$keys += $this->buildProjectKeys( $project );
-		}
-
-		return $keys;
-	}
-
-	private function buildProjectKeys( PhabricatorProject $project ) {
-		$keys = [];
-		foreach ( $this->keyVariants( $project->getName() ) as $variant ) {
-			$keys[$variant] = true;
-		}
-
-		foreach ( $project->getSlugs() as $slug ) {
-			foreach ( $this->keyVariants( $slug->getSlug() ) as $variant ) {
-				$keys[$variant] = true;
+			if ( $project->getHasWorkboard() ) {
+				$boards[$project->getPHID()] = $project;
 			}
 		}
 
-		return $keys;
-	}
-
-	private function hasKey( array $keys, $value ) {
-		foreach ( $this->keyVariants( $value ) as $variant ) {
-			if ( isset( $keys[$variant] ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private function keyVariants( $value ) {
-		$lower = $this->normalizeKey( $value );
-		if ( $lower === '' ) {
+		if ( !$boards ) {
 			return [];
 		}
 
-		return array_unique( [ $lower, PhabricatorSlug::normalizeProjectSlug( $lower ) ] );
-	}
+		$viewer = $this->getViewer();
 
-	private function resolveTarget( $target ) {
-		if ( !is_string( $target ) ) {
-			return null;
+		$columns = id( new PhabricatorProjectColumnQuery() )
+			->setViewer( $viewer )
+			->withProjectPHIDs( array_keys( $boards ) )
+			->execute();
+		$columns = mpull( $columns, null, 'getPHID' );
+
+		$positions = id( new PhabricatorProjectColumnPositionQuery() )
+			->setViewer( $viewer )
+			->withBoardPHIDs( array_keys( $boards ) )
+			->withObjectPHIDs( [ $task->getPHID() ] )
+			->execute();
+
+		$positioned = [];
+		foreach ( $positions as $position ) {
+			$positioned[$position->getBoardPHID()][] = $position->getColumnPHID();
 		}
 
-		$target = trim( $target );
-		if ( $target === '' ) {
-			return null;
-		}
+		$names = [];
+		foreach ( $boards as $board_phid => $project ) {
+			if ( isset( $positioned[$board_phid] ) ) {
+				foreach ( $positioned[$board_phid] as $column_phid ) {
+					if ( isset( $columns[$column_phid] ) ) {
+						$names[$board_phid][] = $columns[$column_phid]->getDisplayName();
+					}
+				}
 
-		if ( !preg_match( '#^https?://#i', $target ) ) {
-			$base = PhabricatorEnv::getEnvConfig( 'mediawikilinks.base' );
-			if ( !phutil_nonempty_string( $base ) ) {
-				return null;
+				continue;
 			}
 
-			$target = $base . str_replace( ' ', '_', $target );
+			foreach ( $columns as $column ) {
+				if ( $column->getProjectPHID() === $board_phid && $column->isDefaultColumn() ) {
+					$names[$board_phid][] = $column->getDisplayName();
+				}
+			}
 		}
 
-		if ( !preg_match( '#^https?://#i', $target ) ) {
-			return null;
-		}
-
-		return $target;
-	}
-
-	private function normalizeKey( $value ) {
-		return phutil_utf8_strtolower( trim( (string)$value ) );
+		return $names;
 	}
 }
