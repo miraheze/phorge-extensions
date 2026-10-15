@@ -86,6 +86,16 @@ final class GitHubPullRequestUtil extends Phobject {
 		return false;
 	}
 
+	public static function hasOpenPull( array $states ) {
+		foreach ( $states as $state ) {
+			if ( self::getKind( $state ) === self::KIND_PULL && idx( $state, 'state' ) === 'open' ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// Keeps stored text safe inside a remarkup literal on a single line.
 	public static function cleanInline( $text, $length = 240 ) {
 		$text = preg_replace( '/[\x00-\x1F\x7F]+/', ' ', (string)$text );
@@ -107,20 +117,20 @@ final class GitHubPullRequestUtil extends Phobject {
 		$number = (int)idx( $value, 'number', 0 );
 
 		if ( self::getKind( $value ) === self::KIND_COMMIT ) {
-			$head = 'Commit ' . self::getShortSha( $value['sha'] ) . ' pushed' .
+			$head = 'Commit ' . self::getShortSha( $value['sha'] ) . ' {gh:pushed}' .
 				( strlen( $author ) ? ' by ' . $author : '' ) . ':';
 		} else {
 			switch ( idx( $value, 'state' ) ) {
 				case 'merged':
-					$head = 'Pull request #' . $number . ' **merged**' .
+					$head = 'Pull request #' . $number . ' {gh:merged}' .
 						( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
 					break;
 				case 'closed':
-					$head = 'Pull request #' . $number . ' **closed**' .
+					$head = 'Pull request #' . $number . ' {gh:closed}' .
 						( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
 					break;
 				default:
-					$head = 'Pull request #' . $number . ' **opened**' .
+					$head = 'Pull request #' . $number . ' {gh:opened}' .
 						( strlen( $author ) ? ' by ' . $author : '' ) . ':';
 					break;
 			}

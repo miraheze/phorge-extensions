@@ -17,6 +17,7 @@ final class GitHubWebhookController extends PhabricatorController {
 	private const PUSH_SETTLE_SECONDS = 3;
 
 	private $botPHID = false;
+	private $tagPHID = false;
 	private $assignees = [];
 	private $lastFailure = '';
 
@@ -268,6 +269,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			->execute();
 
 		$bot_phid = $this->getBotPHID();
+		$tag_phid = $this->getTagPHID();
 		$acting_phid = $bot_phid ?: ( new GitHubIntegrationApplication() )->getPHID();
 		$key = GitHubPullRequestUtil::getStateKey( $value );
 
@@ -298,6 +300,26 @@ final class GitHubWebhookController extends PhabricatorController {
 						id( new ManiphestTransactionComment() )
 							->setContent( GitHubPullRequestUtil::buildCommentBody( $value ) )
 					);
+			}
+
+			if ( $tag_phid ) {
+				$states[$key] = $value;
+				$tagged = in_array(
+					$tag_phid,
+					PhabricatorEdgeQuery::loadDestinationPHIDs(
+						$task->getPHID(),
+						PhabricatorProjectObjectHasProjectEdgeType::EDGECONST
+					),
+					true
+				);
+				$wants_tag = GitHubPullRequestUtil::hasOpenPull( $states );
+
+				if ( $wants_tag !== $tagged ) {
+					$xactions[] = id( new ManiphestTransaction() )
+						->setTransactionType( PhabricatorTransactions::TYPE_EDGE )
+						->setMetadataValue( 'edge:type', PhabricatorProjectObjectHasProjectEdgeType::EDGECONST )
+						->setNewValue( [ ( $wants_tag ? '+' : '-' ) => [ $tag_phid => $tag_phid ] ] );
+				}
 			}
 
 			$status = idx( $references, $task->getID() );
@@ -372,6 +394,32 @@ final class GitHubWebhookController extends PhabricatorController {
 		}
 
 		return $this->botPHID;
+	}
+
+	private function getTagPHID() {
+		if ( $this->tagPHID !== false ) {
+			return $this->tagPHID;
+		}
+
+		$this->tagPHID = null;
+		$name = trim( (string)PhabricatorEnv::getEnvConfig( 'github.open-pr-tag' ) );
+		if ( $name !== '' ) {
+			$query = id( new PhabricatorProjectQuery() )
+				->setViewer( PhabricatorUser::getOmnipotentUser() );
+
+			if ( preg_match( '/^PHID-PROJ-[a-z0-9]+$/', $name ) ) {
+				$query->withPHIDs( [ $name ] );
+			} else {
+				$query->withSlugs( [ PhabricatorSlug::normalizeProjectSlug( ltrim( $name, '#' ) ) ] );
+			}
+
+			$project = $query->executeOne();
+			if ( $project && !$project->isArchived() ) {
+				$this->tagPHID = $project->getPHID();
+			}
+		}
+
+		return $this->tagPHID;
 	}
 
 	private function fetchGitHub( $path ) {

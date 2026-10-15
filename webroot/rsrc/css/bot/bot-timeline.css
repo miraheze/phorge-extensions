@@ -1,0 +1,187 @@
+/**
+ * @provides bot-timeline-css
+ */
+
+.phui-timeline-major-event:has(a.phui-timeline-image:is([href="/p/GitHubBot/"], [href="/p/SALBot/"])) {
+  & .phui-timeline-content {
+    border-width: 0;
+  }
+
+  & .phui-timeline-wedge {
+    display: none;
+  }
+
+  & a.phui-timeline-image {
+    top: 8px;
+    left: 5px;
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .device & a.phui-timeline-image {
+    display: block;
+    left: 3px;
+  }
+
+  & .phui-timeline-group {
+    border-width: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  & .phui-timeline-inner-content {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 6px 30px 24px 37px;
+    color: {$darkgreytext};
+  }
+
+  & .phui-timeline-core-content {
+    order: 1;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    overflow-wrap: anywhere;
+
+    & p {
+      margin: 0;
+    }
+
+    & .transaction-comment {
+      display: block;
+      position: relative;
+    }
+  }
+
+  /* The title row holds the status or tag change, shown small under the comment */
+  & .phui-timeline-title {
+    order: 2;
+    position: static;
+    display: block;
+    height: auto;
+    min-height: 0;
+    margin: 2px 0 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    font-size: 0;
+    line-height: 1.4;
+    color: {$darkgreytext};
+
+    /* Only status and tag changes keep their text, a plain "added a comment" is dropped */
+    &:has(.phui-timeline-value, a.phui-handle:not([href^="/p/"]), span.phui-handle) {
+      font-size: 12px;
+    }
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+
+    & .phui-timeline-icon-fill,
+    & a.phui-handle[href^="/p/"] {
+      display: none;
+    }
+
+    & .phui-timeline-extra {
+      position: absolute;
+      bottom: 5px;
+      left: 37px;
+      float: none;
+      margin: 0;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: {$lightgreytext};
+    }
+
+    & .phui-timeline-extra a {
+      color: inherit;
+    }
+  }
+
+  & .phui-timeline-menu {
+    top: 6px;
+    right: 4px;
+  }
+}
+
+
+/* GitHubBot: the whole comment is a link to the pull request or commit */
+
+.phui-timeline-major-event:has(a.phui-timeline-image[href="/p/GitHubBot/"]) {
+  & .transaction-comment:hover,
+  & .transaction-comment:hover * {
+    color: {$anchor};
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  & .transaction-comment p:last-child .remarkup-link:only-child {
+    color: transparent;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  /* Blue is the default, so comments without a state class stay blue */
+  &:has(.transaction-comment .gh-state-merged) a.phui-timeline-image {
+    filter: saturate(110%) hue-rotate(79deg) brightness(0.81);
+  }
+
+  &:has(.transaction-comment .gh-state-closed) a.phui-timeline-image {
+    filter: grayscale(1) brightness(1.3);
+  }
+
+  &:has(.transaction-comment .gh-state-pushed) a.phui-timeline-image {
+    filter: saturate(100%) hue-rotate(298deg) brightness(0.97);
+  }
+}
+
+
+/* SALBot: long entries are clamped until hovered, or a bit longer on touch screens */
+
+.phui-timeline-major-event:has(a.phui-timeline-image[href="/p/SALBot/"]) {
+  & .phabricator-remarkup p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
+  & .transaction-comment:hover .phabricator-remarkup p {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  @media (hover: none) {
+    & .phabricator-remarkup p {
+      -webkit-line-clamp: 6;
+      line-clamp: 6;
+    }
+  }
+}
+
+
+/* Tag changes by GitHubBot and anything SALBot does without a comment are dimmed and compact */
+
+.phui-timeline-minor-event .phui-timeline-content:has(a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group a.phui-handle[href^="/tag/"], a.phui-timeline-image[href="/p/SALBot/"]) {
+  opacity: 0.65;
+  font-size: 0.9em;
+
+  &:hover {
+    opacity: 1;
+  }
+}

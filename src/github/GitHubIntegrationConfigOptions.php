@@ -49,6 +49,16 @@ final class GitHubIntegrationConfigOptions
 						'closes tasks. Comments are skipped if it does not exist.'
 					)
 				),
+			$this->newOption( 'github.open-pr-tag', 'string', null )
+				->addExample( 'pull_request_ready', pht( 'Project hashtag' ) )
+				->setDescription(
+					pht(
+						'Project tag added to a task while it has an open pull ' .
+						'request and removed once none are left. Accepts a ' .
+						'hashtag, a project name or a project PHID. Leave empty ' .
+						'to disable.'
+					)
+				),
 			$this->newOption( 'github.allowed-owners', 'list<string>', [] )
 				->addExample( [ 'miraheze' ], pht( 'Single organization' ) )
 				->setDescription(
