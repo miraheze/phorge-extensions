@@ -126,11 +126,11 @@ final class GitHubPullRequestUtil extends Phobject {
 						( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
 					break;
 				case 'closed':
-					$head = 'Pull request #' . $number . ' **closed**' .
+					$head = 'Pull request #' . $number . ' ~~closed~~' .
 						( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
 					break;
 				default:
-					$head = 'Pull request #' . $number . ' **opened**' .
+					$head = 'Pull request #' . $number . ' opened' .
 						( strlen( $author ) ? ' by ' . $author : '' ) . ':';
 					break;
 			}
