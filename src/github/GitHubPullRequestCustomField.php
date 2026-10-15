@@ -37,6 +37,8 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 			return null;
 		}
 
+		require_celerity_resource( 'bot-timeline-css' );
+
 		$rows = [];
 		foreach ( array_reverse( $states ) as $state ) {
 			$subject = phutil_tag(
