@@ -86,6 +86,16 @@ final class GitHubPullRequestUtil extends Phobject {
 		return false;
 	}
 
+	public static function hasOpenPull( array $states ) {
+		foreach ( $states as $state ) {
+			if ( self::getKind( $state ) === self::KIND_PULL && idx( $state, 'state' ) === 'open' ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// Keeps stored text safe inside a remarkup literal on a single line.
 	public static function cleanInline( $text, $length = 240 ) {
 		$text = preg_replace( '/[\x00-\x1F\x7F]+/', ' ', (string)$text );
