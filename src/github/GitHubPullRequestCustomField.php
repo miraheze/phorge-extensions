@@ -27,6 +27,8 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 	}
 
 	public function renderPropertyViewValue( array $handles ) {
+		require_celerity_resource( 'bot-timeline-css', 'mf-ext-misc' );
+
 		$task = $this->getObject();
 		if ( !$task || !$task->getPHID() ) {
 			return null;
@@ -36,8 +38,6 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 		if ( !$states ) {
 			return null;
 		}
-
-		require_celerity_resource( 'bot-timeline-css', 'mf-ext-misc' );
 
 		$rows = [];
 		foreach ( array_reverse( $states ) as $state ) {
