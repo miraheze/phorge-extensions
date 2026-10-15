@@ -37,7 +37,7 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 			return null;
 		}
 
-		require_celerity_resource( 'bot-timeline-css' );
+		require_celerity_resource( 'bot-timeline-css', 'mf-ext-misc' );
 
 		$rows = [];
 		foreach ( array_reverse( $states ) as $state ) {
