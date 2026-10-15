@@ -23,7 +23,10 @@ final class ProjectTagLinksConfigOptions extends PhabricatorApplicationConfigOpt
 {
 	"Database": {
 		"Delete a wiki": "Tech:Delete_a_wiki",
-		"Rename a wiki": "https://meta.miraheze.org/wiki/Tech:Rename_a_wiki",
+		"Rename a wiki": {
+			"url": "https://meta.miraheze.org/wiki/Tech:Rename_a_wiki",
+			"columns": [ "Wiki rename" ]
+		},
 		"Resetting a wiki": {
 			"url": "Tech:Wiki_reset",
 			"visibility": "login"
@@ -56,6 +59,13 @@ EOT;
 						"An object has a `url` key and can also set `visibility` and `projects` " .
 						"to control who sees that link. Links without their own access settings " .
 						"use `projecttaglinks.default-access`.\n\n" .
+						"An object can also set `columns`, a list of workboard column names. The " .
+						"link then only shows on tasks sitting in one of those columns on the " .
+						"workboard of the project it is listed under, and only if the viewer " .
+						"passes its access settings too. Column names are matched without regard " .
+						"to case. The first column of a board is called Backlog, and a task that " .
+						"was never moved on a board counts as being in it. Links with `columns` " .
+						"are not shown in the project menu item.\n\n" .
 						"An address that starts with http:// or https:// is used as is. Any other " .
 						"address is treated as a page title and appended to `mediawikilinks.base`.\n\n" .
 						"Project names and hashtags are matched without regard to case."
