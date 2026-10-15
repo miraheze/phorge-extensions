@@ -72,9 +72,14 @@
     padding: 0;
     background: transparent;
     border: 0;
-    font-size: 12px;
+    font-size: 0;
     line-height: 1.4;
     color: {$darkgreytext};
+
+    /* Only status and tag changes keep their text, a plain "added a comment" is dropped */
+    &:has(.phui-timeline-value, a.phui-handle:not([href^="/p/"]), span.phui-handle) {
+      font-size: 12px;
+    }
 
     &::first-letter {
       text-transform: uppercase;
