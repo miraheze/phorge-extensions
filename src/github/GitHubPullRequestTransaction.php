@@ -8,6 +8,10 @@ final class GitHubPullRequestTransaction extends ManiphestTaskTransactionType {
 		return null;
 	}
 
+	public function shouldHide() {
+		return true;
+	}
+
 	public function shouldHideForMail() {
 		return true;
 	}
