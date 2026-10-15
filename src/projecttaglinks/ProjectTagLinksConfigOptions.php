@@ -37,6 +37,10 @@ final class ProjectTagLinksConfigOptions extends PhabricatorApplicationConfigOpt
 			"url": "Tech:MediaWiki_appserver",
 			"projects": [ "acl*security", "tech-mediawiki" ]
 		}
+	},
+	"Configuration": {
+		"Learn how to make a config change yourself": "Tech:Making_a_config_change",
+		"Open a pull request": "https://github.com/miraheze/mw-config"
 	}
 }
 EOT;
@@ -66,6 +70,10 @@ EOT;
 						"to case. The first column of a board is called Backlog, and a task that " .
 						"was never moved on a board counts as being in it. Links with `columns` " .
 						"are not shown in the project menu item.\n\n" .
+						"The panel shows the site each link goes to under its title and picks an " .
+						"icon from the link address, such as a GitHub icon for github.com. An " .
+						"object can set `icon` to a Font Awesome name such as `fa-code-fork` to " .
+						"choose its own.\n\n" .
 						"An address that starts with http:// or https:// is used as is. Any other " .
 						"address is treated as a page title and appended to `mediawikilinks.base`.\n\n" .
 						"Project names and hashtags are matched without regard to case."
