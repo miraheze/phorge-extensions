@@ -33,7 +33,7 @@ final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
 
 		return $this->newPanel()
 			->setHeaderText( pht( 'Helpful Links' ) )
-			->setOrder( 12000 )
+			->setOrder( 50000 )
 			->appendChild( phutil_implode_html( phutil_tag( 'br' ), $links ) );
 	}
 }
