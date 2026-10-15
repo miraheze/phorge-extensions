@@ -30,6 +30,32 @@ final class ProjectTagLinksUtil extends Phobject {
 		return false;
 	}
 
+	public function buildTaskLinks( ManiphestTask $task ) {
+		if ( !$task->getPHID() || !$this->hasAnyConfig() ) {
+			return [];
+		}
+
+		$projects = $this->loadTaskProjects( $task );
+		if ( !$projects ) {
+			return [];
+		}
+
+		$column_names = $this->usesColumns() ? $this->loadColumnNames( $task, $projects ) : [];
+
+		$candidates = [];
+		foreach ( $projects as $project ) {
+			$candidates = array_merge(
+				$candidates,
+				$this->collectProjectLinks(
+					$this->getProjectKeys( $project ),
+					$column_names[$project->getPHID()] ?? []
+				)
+			);
+		}
+
+		return $this->filterVisible( $candidates );
+	}
+
 	public function getProjectKeys( PhabricatorProject $project ) {
 		$keys = [];
 		foreach ( $this->keyVariants( $project->getName() ) as $variant ) {
@@ -87,6 +113,74 @@ final class ProjectTagLinksUtil extends Phobject {
 		}
 
 		return array_values( $links );
+	}
+
+	private function loadTaskProjects( ManiphestTask $task ) {
+		$project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+			$task->getPHID(),
+			PhabricatorProjectObjectHasProjectEdgeType::EDGECONST
+		);
+
+		if ( !$project_phids ) {
+			return [];
+		}
+
+		return id( new PhabricatorProjectQuery() )
+			->setViewer( $this->viewer )
+			->withPHIDs( $project_phids )
+			->needSlugs( true )
+			->execute();
+	}
+
+	private function loadColumnNames( ManiphestTask $task, array $projects ) {
+		$boards = [];
+		foreach ( $projects as $project ) {
+			if ( $project->getHasWorkboard() ) {
+				$boards[$project->getPHID()] = $project;
+			}
+		}
+
+		if ( !$boards ) {
+			return [];
+		}
+
+		$columns = id( new PhabricatorProjectColumnQuery() )
+			->setViewer( $this->viewer )
+			->withProjectPHIDs( array_keys( $boards ) )
+			->execute();
+		$columns = mpull( $columns, null, 'getPHID' );
+
+		$positions = id( new PhabricatorProjectColumnPositionQuery() )
+			->setViewer( $this->viewer )
+			->withBoardPHIDs( array_keys( $boards ) )
+			->withObjectPHIDs( [ $task->getPHID() ] )
+			->execute();
+
+		$positioned = [];
+		foreach ( $positions as $position ) {
+			$positioned[$position->getBoardPHID()][] = $position->getColumnPHID();
+		}
+
+		$names = [];
+		foreach ( $boards as $board_phid => $project ) {
+			if ( isset( $positioned[$board_phid] ) ) {
+				foreach ( $positioned[$board_phid] as $column_phid ) {
+					if ( isset( $columns[$column_phid] ) ) {
+						$names[$board_phid][] = $columns[$column_phid]->getDisplayName();
+					}
+				}
+
+				continue;
+			}
+
+			foreach ( $columns as $column ) {
+				if ( $column->getProjectPHID() === $board_phid && $column->isDefaultColumn() ) {
+					$names[$board_phid][] = $column->getDisplayName();
+				}
+			}
+		}
+
+		return $names;
 	}
 
 	private function buildCandidates( array $entries ) {
