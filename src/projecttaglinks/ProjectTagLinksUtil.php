@@ -109,6 +109,7 @@ final class ProjectTagLinksUtil extends Phobject {
 			$links[$uri] = [
 				'label' => $candidate['label'],
 				'uri' => $uri,
+				'icon' => $candidate['icon'],
 			];
 		}
 
@@ -199,6 +200,7 @@ final class ProjectTagLinksUtil extends Phobject {
 		$default_access = $this->getDefaultAccess();
 
 		$columns = null;
+		$icon = null;
 
 		if ( is_string( $entry ) ) {
 			$target = $entry;
@@ -207,6 +209,7 @@ final class ProjectTagLinksUtil extends Phobject {
 			$target = $entry['url'] ?? null;
 			$access = $this->parseAccess( $entry, $default_access );
 			$columns = $this->parseColumns( $entry );
+			$icon = $this->parseIcon( $entry );
 		} else {
 			return null;
 		}
@@ -221,7 +224,17 @@ final class ProjectTagLinksUtil extends Phobject {
 			'uri' => $uri,
 			'access' => $access,
 			'columns' => $columns,
+			'icon' => $icon,
 		];
+	}
+
+	private function parseIcon( array $spec ) {
+		$icon = $spec['icon'] ?? null;
+		if ( !is_string( $icon ) || !preg_match( '/^fa-[a-z0-9-]+$/', $icon ) ) {
+			return null;
+		}
+
+		return $icon;
 	}
 
 	private function parseColumns( array $spec ) {
