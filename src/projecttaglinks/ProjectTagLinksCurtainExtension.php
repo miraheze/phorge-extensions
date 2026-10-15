@@ -1,7 +1,7 @@
 <?php
 
 final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
-	public const EXTENSIONKEY = 'miraheze.project-tag-links';
+	public const EXTENSIONKEY = 'custom.project-tag-links';
 
 	public function shouldEnableForObject( $object ) {
 		return ( $object instanceof ManiphestTask );
