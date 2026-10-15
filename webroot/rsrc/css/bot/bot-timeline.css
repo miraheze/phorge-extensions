@@ -1,0 +1,298 @@
+/**
+ * @provides bot-timeline-css
+ */
+
+/* Turn the bot avatar into a timeline icon */
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"],
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] {
+  background-position: center;
+  left: 5px;
+  width: 26px;
+  height: 26px;
+  top: 50%;
+  margin-top: -13px;
+}
+
+.device .phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"],
+.device .phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] {
+  display: block;
+  left: 3px;
+}
+
+
+/* Hide the title "bot added a comment" */
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-wedge,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-wedge {
+  display: none;
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-title,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-title {
+  height: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  visibility: hidden;
+  overflow: visible;
+  z-index: 1;
+
+  .device & {
+    line-height: 0;
+  }
+  .device-desktop & {
+    line-height: 1.2;
+  }
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-menu,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-menu {
+  z-index: 1;
+  margin-top: -10.5px;
+}
+
+/* Restore timestamp position */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-title .phui-timeline-extra,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-title .phui-timeline-extra {
+  float: right;
+  visibility: visible;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-right: -8px;
+}
+
+
+/* Rearrange how the border for all comments is set, so that we can hide it for bot comments */
+
+.phui-timeline-major-event .phui-timeline-content {
+  border-width: 0;
+}
+
+.phui-timeline-major-event .phui-timeline-content .phui-timeline-group {
+  border-top: inherit;
+  border-bottom: inherit;
+  border-width: 1px;
+}
+
+
+/* Hide bot comment box background and border */
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group {
+  border-width: 0;
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-inner-content,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-inner-content {
+  color: {$darkgreytext};
+  padding: 0;
+  padding-left: 37px;
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-core-content,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-core-content {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: max-content;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-core-content p,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-core-content p {
+  margin: 0;
+}
+
+
+/* Tighten white space for multiple comments */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-core-content .transaction-comment,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-core-content .transaction-comment {
+  display: block;
+  margin-top: -4px;
+  margin-right: 3px;
+  position: relative;
+}
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group .phui-timeline-core-content .transaction-comment:hover {
+  color: {$anchor};
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Hide the visible link, instead make the whole item into a clickable link */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group p:last-child .remarkup-link:only-child {
+  color: transparent;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+
+/* SALBot: Limit comments to a truncated one-line snippet until hovered */
+
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phabricator-remarkup {
+  display: grid;
+  grid-template-rows: 0fr;
+  grid-template-columns: 0fr;
+  clip-path: polygon(0 0, 50em 0, 50em 100%, 0 100%);
+  transition: all 250ms, grid-template-columns 0s 250ms;
+}
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phabricator-remarkup p {
+  min-height: 45px;
+  min-width: min(50em, 80vw);
+
+  .device-desktop & {
+    min-width: min(50em, 40vw);
+  }
+
+  &,
+  & * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: white-space 0s 250ms;
+    transition-behavior: allow-discrete;
+  }
+}
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phabricator-remarkup:hover {
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transition: all 250ms, grid-template-columns 0s;
+}
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phabricator-remarkup:hover p {
+  min-width: auto;
+  &,
+  & * {
+    white-space: normal;
+    transition: white-space 0s;
+  }
+}
+
+/* Avoid the icon moving when expanding */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] {
+  top: 20px;
+}
+
+/* Allow overlapping the grid box for better display on most screen sizes */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .phui-timeline-title .phui-timeline-extra {
+  margin-bottom: -99px;
+}
+
+/* Link styles */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .remarkup-nav-sequence:hover {
+  color: {$anchor};
+  cursor: pointer;
+  text-decoration: underline;
+}
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .remarkup-nav-sequence,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .remarkup-nav-sequence *,
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] ~ .phui-timeline-group .remarkup-nav-sequence *:before {
+  all: unset;
+  display: block;
+  font-weight: bold;
+}
+
+
+/* Change timeline icon colors */
+
+/* The blue profile picture is left alone for an opened pull request */
+/* A <strong> tag indicates a merged pull request or a pushed commit */
+.phui-timeline-major-event:has(.phui-timeline-group .phui-timeline-core-content .transaction-comment strong) a.phui-timeline-image[href="/p/GitHubBot/"] {
+  filter: saturate(130%) hue-rotate(298deg);
+}
+/* A <del> tag indicates a pull request closed without merging */
+.phui-timeline-major-event:has(.phui-timeline-group .phui-timeline-core-content .transaction-comment del) a.phui-timeline-image[href="/p/GitHubBot/"] {
+  filter: saturate(150%) hue-rotate(162deg);
+}
+
+/* Make the SALBot icon less starey */
+.phui-timeline-major-event a.phui-timeline-image[href="/p/SALBot/"] {
+  filter: contrast(0);
+}
+
+
+/* Hide the tag added or removed by GitHubBot */
+/* Hide "SALBot mentioned this in..." */
+
+.phui-timeline-minor-event .phui-timeline-content:has(
+  a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group a.phui-handle[href^="/tag/"],
+  a.phui-timeline-image[href="/p/SALBot/"]
+) {
+  visibility: hidden;
+  display: grid;
+  grid-template-rows: 0;
+  transition: margin-top 100ms, grid-template-rows 100ms;
+  white-space: nowrap;
+  .device-phone & .phui-timeline-extra {
+    display: inline-block;
+  }
+
+  .device & {
+    margin-top: -37px;
+  }
+  .device-desktop & {
+    margin-top: -16px;
+  }
+
+  /* On hover, show with a smooth height transition */
+  &:hover {
+    visibility: visible;
+    grid-template-rows: 1fr;
+    margin-top: 0;
+
+    & > * {
+      opacity: 1;
+    }
+  }
+
+  /* On un-hover, delay the transition so the cursor can move from the icon to the entry */
+  &:not(:hover) {
+    transition: margin-top 100ms, grid-template-rows 100ms, visibility 0ms;
+    transition-delay: 500ms;
+    &::before { transition-delay: 500ms; }
+    & > * { transition: opacity 100ms 500ms; }
+  }
+
+  /* Add an "expand" chevron icon that serves as the hover target */
+  &::before {
+    content: "";
+    background: 5px 5px no-repeat none;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIxMjAiIHZpZXdCb3g9IjAgMCAyMCAxMjAiPjxwYXRoIGQ9Im0xNy41IDQuNzUtNy41IDcuNS03LjUtNy41TDEgNi4yNWw5IDkgOS05eiIgZmlsbD0iIzZiNzQ4YyIvPjxwYXRoIGQ9Im0xNy41IDEwNC43NS03LjUgNy41LTcuNS03LjVMMSAxMDYuMjVsOSA5IDktOXoiIGZpbGw9IiMxMzZDQjIiLz48L3N2Zz4=);
+    visibility: visible;
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    margin-left: -75px;
+    margin-top: -31px;
+    transition: margin-top 100ms, background-position 0ms;
+  }
+  &:hover::before {
+    filter: drop-shadow(0 0 5px {$anchor});
+    background-position: 5px -95px;
+  }
+
+  /* Tweaks to avoid "hover gaps" within the row */
+  .phui-timeline-image {
+    padding-right: 20px;
+  }
+  &:hover::before {
+    height: 70px;
+    width: 35px;
+    margin-top: -47px;
+  }
+}
+
+/* Avoid multiple "expand" icons overlapping */
+.phui-timeline-minor-event .phui-timeline-content a.phui-timeline-image[href="/p/GitHubBot/"] ~ .phui-timeline-group a.phui-handle[href^="/tag/"],
+.phui-timeline-minor-event .phui-timeline-content a.phui-timeline-image[href="/p/SALBot/"] {
+  .phui-timeline-shell:has(&) + .phui-timeline-spacer + .phui-timeline-shell:has(&) {
+    margin-top: 10px;
+  }
+}
