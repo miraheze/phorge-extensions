@@ -14,26 +14,28 @@ final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
 	public function buildCurtainPanel( $object ) {
 		$util = new ProjectTagLinksUtil( $this->getViewer() );
 
-		$links = [];
-		foreach ( $util->buildTaskLinks( $object ) as $link ) {
-			$links[] = phutil_tag(
-				'a',
-				[
-					'href' => $link['uri'],
-					'target' => '_blank',
-					'rel' => 'noreferrer',
-				],
-				$link['label']
-			);
-		}
-
+		$links = $util->buildTaskLinks( $object );
 		if ( !$links ) {
 			return null;
+		}
+
+		$list = id( new PHUIListView() )
+			->setType( PHUIListView::SIDENAV_LIST );
+
+		foreach ( $links as $link ) {
+			$list->addMenuItem(
+				id( new PHUIListItemView() )
+					->setName( $link['label'] )
+					->setHref( $link['uri'] )
+					->setIcon( 'fa-external-link' )
+					->setOpenInNewWindow( true )
+					->setRel( 'noreferrer' )
+			);
 		}
 
 		return $this->newPanel()
 			->setHeaderText( pht( 'Helpful Links' ) )
 			->setOrder( 50 )
-			->appendChild( phutil_implode_html( phutil_tag( 'br' ), $links ) );
+			->appendChild( $list );
 	}
 }
