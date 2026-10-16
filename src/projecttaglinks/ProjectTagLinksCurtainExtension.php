@@ -29,6 +29,8 @@ final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
 			return null;
 		}
 
+		require_celerity_resource( 'project-tag-links-css', 'mf-ext-misc' );
+
 		$rows = [];
 		foreach ( $links as $link ) {
 			$rows[] = $this->renderRow( $link );
@@ -37,10 +39,7 @@ final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
 		return $this->newPanel()
 			->setHeaderText( pht( 'Helpful Links' ) )
 			->setOrder( 50000 )
-			->appendChild( [
-				$this->renderStyle(),
-				phutil_tag( 'div', [ 'class' => 'ptl' ], $rows ),
-			] );
+			->appendChild( phutil_tag( 'div', [ 'class' => 'ptl' ], $rows ) );
 	}
 
 	private function renderRow( array $link ) {
@@ -99,31 +98,5 @@ final class ProjectTagLinksCurtainExtension extends PHUICurtainExtension {
 		}
 
 		return self::KIND_OTHER;
-	}
-
-	private function renderStyle() {
-		$css = <<<'EOT'
-.ptl { overflow: hidden; margin: 2px 0 4px; border: 1px solid rgba(18, 48, 63, 0.14); border-radius: 10px; font-size: 13px; line-height: 1.35; }
-.ptl .phui-icon-view { font-size: inherit; line-height: 1; }
-.ptl .ptl-tile .phui-icon-view { color: #fff; }
-.ptl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-.ptl a.ptl-row { display: flex; align-items: center; gap: 11px; padding: 9px 11px; color: #12303f; text-decoration: none; }
-.ptl a.ptl-row + a.ptl-row { border-top: 1px solid rgba(18, 48, 63, 0.09); }
-.ptl a.ptl-row:hover,
-.ptl a.ptl-row:focus { background: rgba(15, 98, 119, 0.06); color: #0f6277; text-decoration: none; }
-.ptl a.ptl-row:focus-visible { outline: 2px solid #0f6277; outline-offset: -2px; }
-
-.ptl-tile { flex: 0 0 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 15px; }
-.ptl-tile-github { background: #24292f; }
-.ptl-tile-wiki { background: #0f6277; }
-.ptl-tile-other { background: #5d7080; }
-
-.ptl-text { flex: 1; min-width: 0; }
-.ptl-title { display: block; font-weight: 600; }
-.ptl-host { display: block; margin-top: 1px; font-size: 12px; color: #5d7080; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-EOT;
-
-		return phutil_tag( 'style', [], phutil_safe_html( $css ) );
 	}
 }
