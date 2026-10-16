@@ -63,9 +63,11 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 			return $table;
 		}
 
+		require_celerity_resource( 'github-pull-requests-css', 'mf-ext-misc' );
+
 		$hint = phutil_tag(
 			'div',
-			[ 'style' => 'margin-top: 8px; color: #6b748c;' ],
+			[ 'class' => 'github-pr-link-hint' ],
 			[
 				phutil_tag( 'a', [ 'href' => $uri ], pht( 'Link your GitHub account' ) ),
 				pht( ' to get tasks assigned to you when your fixes are merged.' ),
