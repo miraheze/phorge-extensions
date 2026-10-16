@@ -25,12 +25,6 @@ final class FeedBotsDashboardPanelType extends PhabricatorDashboardPanelType {
 	}
 
 	protected function newEditEngineFields( PhabricatorDashboardPanel $panel ) {
-		if ( !$panel->getID() ) {
-			throw new Exception(
-				pht( 'This panel type can not be created anymore.' )
-			);
-		}
-
 		return [];
 	}
 
