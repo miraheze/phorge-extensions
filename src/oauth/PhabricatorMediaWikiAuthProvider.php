@@ -167,21 +167,14 @@ final class PhabricatorMediaWikiAuthProvider extends PhabricatorOAuth1AuthProvid
 			->setText( $button_text )
 			->setSubtext( $this->getProviderName() );
 
-		$icon_style = phutil_tag(
-			'style',
-			[],
-			'.phui-icon-view.login-miraheze-icon { ' .
-			'height: 28px; width: 28px; ' .
-			'background-size: 28px 28px; background-repeat: no-repeat; ' .
-			'}'
-		);
+		require_celerity_resource( 'mediawiki-login-css', 'mf-ext-misc' );
 
 		$uri = $attributes['uri'];
 		$uri = new PhutilURI( $uri );
 		$params = $uri->getQueryParamsAsPairList();
 		$uri->removeAllQueryParams();
 
-		$content = [ $icon_style, $button ];
+		$content = [ $button ];
 
 		foreach ( $params as $pair ) {
 			[ $key, $value ] = $pair;
