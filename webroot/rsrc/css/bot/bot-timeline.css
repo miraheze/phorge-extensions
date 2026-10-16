@@ -76,8 +76,8 @@
     line-height: 1.4;
     color: {$darkgreytext};
 
-    /* Only status and tag changes keep their text, a plain "added a comment" is dropped */
-    &:has(.phui-timeline-value, a.phui-handle:not([href^="/p/"]), span.phui-handle) {
+    /* Status, tag and assignment changes keep their text, a plain "added a comment" is dropped */
+    &:has(.phui-timeline-value, a.phui-handle:not([href^="/p/"]), span.phui-handle, a.phui-handle ~ a.phui-handle) {
       font-size: 12px;
     }
 
@@ -86,7 +86,7 @@
     }
 
     & .phui-timeline-icon-fill,
-    & a.phui-handle[href^="/p/"] {
+    & > a.phui-handle:first-of-type {
       display: none;
     }
 
