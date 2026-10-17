@@ -41,6 +41,10 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 
 		$rows = [];
 		foreach ( array_reverse( $states ) as $state ) {
+			if ( idx( $state, 'state' ) === 'removed' ) {
+				continue;
+			}
+
 			$subject = phutil_tag(
 				'a',
 				[ 'href' => GitHubPullRequestUtil::getURI( $state ) ],
@@ -52,6 +56,10 @@ final class GitHubPullRequestCustomField extends ManiphestCustomField {
 				(string)idx( $state, 'author', '' ),
 				$this->renderStatus( $state ),
 			];
+		}
+
+		if ( !$rows ) {
+			return null;
 		}
 
 		$table = id( new AphrontTableView( $rows ) )

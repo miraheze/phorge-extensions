@@ -5,7 +5,7 @@ final class GitHubPullRequestUtil extends Phobject {
 	public const KIND_PULL = 'pr';
 	public const KIND_COMMIT = 'commit';
 
-	private const MAX_TASKS = 10;
+	public const MAX_TASKS = 10;
 
 	public static function isValidRepository( $name ) {
 		return (bool)preg_match(
@@ -128,6 +128,9 @@ final class GitHubPullRequestUtil extends Phobject {
 				case 'closed':
 					$head = 'Pull request #' . $number . ' {gh:closed}' .
 						( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
+					break;
+				case 'removed':
+					$head = 'Pull request #' . $number . ' {gh:removed} from this task, it no longer references it:';
 					break;
 				default:
 					$head = 'Pull request #' . $number . ' {gh:opened}' .

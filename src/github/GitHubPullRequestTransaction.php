@@ -34,6 +34,7 @@ final class GitHubPullRequestTransaction extends ManiphestTaskTransactionType {
 			case 'merged':
 				return 'violet';
 			case 'closed':
+			case 'removed':
 				return 'grey';
 			default:
 				return 'blue';
@@ -75,6 +76,9 @@ final class GitHubPullRequestTransaction extends ManiphestTaskTransactionType {
 					$first = strlen( $actor ) ?
 						pht( 'Pull request %s closed by %s without merging:', $link, $actor ) :
 						pht( 'Pull request %s closed without merging:', $link );
+					break;
+				case 'removed':
+					$first = pht( 'Pull request %s removed from this task:', $link );
 					break;
 				default:
 					$first = strlen( $author ) ?
