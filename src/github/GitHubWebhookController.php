@@ -124,10 +124,12 @@ final class GitHubWebhookController extends PhabricatorController {
 			}
 		}
 
-		$merge_sha = (string)idx( $pull, 'merge_commit_sha', '' );
-		if ( $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ) {
-			[ $code, $merge_commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $merge_sha );
-			if ( is_array( $merge_commit ) && idx( $merge_commit, 'sha' ) === $merge_sha ) {
+		$merge_sha = '';
+		$candidate = (string)idxv( $payload, [ 'pull_request', 'merge_commit_sha' ], '' );
+		if ( $is_merged && GitHubPullRequestUtil::isValidSha( $candidate ) ) {
+			[ $code, $merge_commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $candidate );
+			if ( is_array( $merge_commit ) && idx( $merge_commit, 'sha' ) === $candidate ) {
+				$merge_sha = $candidate;
 				$corpus[] = (string)idxv( $merge_commit, [ 'commit', 'message' ], '' );
 			}
 		}
@@ -154,7 +156,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			'author' => GitHubPullRequestUtil::isValidLogin( $author ) ? $author : '',
 			'actor' => GitHubPullRequestUtil::isValidLogin( $actor ) ? $actor : '',
 			'state' => $state,
-			'merge_sha' => $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ? $merge_sha : '',
+			'merge_sha' => $merge_sha,
 		];
 
 		// A reference that disappears from a pull request that is still open unlinks the task.
@@ -245,7 +247,7 @@ final class GitHubWebhookController extends PhabricatorController {
 
 			$from_pull = false;
 			foreach ( $pulls as $pull ) {
-				if ( is_array( $pull ) && ( idx( $pull, 'merged_at' ) || idx( $pull, 'merge_commit_sha' ) === $sha ) ) {
+				if ( is_array( $pull ) && idx( $pull, 'merged_at' ) ) {
 					$from_pull = true;
 					break;
 				}
@@ -321,6 +323,10 @@ final class GitHubWebhookController extends PhabricatorController {
 				try {
 					$changed = false;
 					if ( $is_pull && $this->hasDescriptionChanged( $last, $value ) ) {
+						// Only the closing event names the merge commit, so later edits keep the stored one.
+						if ( $value['merge_sha'] === '' ) {
+							$value['merge_sha'] = (string)idx( $last, 'merge_sha', '' );
+						}
 						$this->applyTransactions( $task, $source, $acting_phid, [ $this->newStateTransaction( $value ) ] );
 						$changed = true;
 					}
@@ -658,7 +664,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		$future = id( new HTTPSFuture( 'https://api.github.com' . $path ) )
 			->setMethod( 'GET' )
 			->addHeader( 'Accept', 'application/vnd.github+json' )
-			->addHeader( 'X-GitHub-Api-Version', '2022-11-28' )
+			->addHeader( 'X-GitHub-Api-Version', '2026-03-10' )
 			->addHeader( 'User-Agent', 'WikiTide-Phorge' )
 			->setTimeout( 15 );
 
