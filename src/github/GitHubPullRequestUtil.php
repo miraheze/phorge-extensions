@@ -5,7 +5,7 @@ final class GitHubPullRequestUtil extends Phobject {
 	public const KIND_PULL = 'pr';
 	public const KIND_COMMIT = 'commit';
 
-	private const MAX_TASKS = 10;
+	public const MAX_TASKS = 10;
 
 	public static function isValidRepository( $name ) {
 		return (bool)preg_match(
@@ -111,32 +111,33 @@ final class GitHubPullRequestUtil extends Phobject {
 			idx( $value, 'title', '' );
 	}
 
-	public static function buildCommentBody( array $value ) {
+	public static function buildHeader( array $value ) {
 		$actor = (string)idx( $value, 'actor', '' );
 		$author = (string)idx( $value, 'author', '' );
 		$number = (int)idx( $value, 'number', 0 );
 
 		if ( self::getKind( $value ) === self::KIND_COMMIT ) {
-			$head = 'Commit ' . self::getShortSha( $value['sha'] ) . ' {gh:pushed}' .
+			return 'Commit ' . self::getShortSha( $value['sha'] ) . ' {gh:pushed}' .
 				( strlen( $author ) ? ' by ' . $author : '' ) . ':';
-		} else {
-			switch ( idx( $value, 'state' ) ) {
-				case 'merged':
-					$head = 'Pull request #' . $number . ' {gh:merged}' .
-						( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
-					break;
-				case 'closed':
-					$head = 'Pull request #' . $number . ' {gh:closed}' .
-						( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
-					break;
-				default:
-					$head = 'Pull request #' . $number . ' {gh:opened}' .
-						( strlen( $author ) ? ' by ' . $author : '' ) . ':';
-					break;
-			}
 		}
 
-		return $head . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
+		switch ( idx( $value, 'state' ) ) {
+			case 'merged':
+				return 'Pull request #' . $number . ' {gh:merged}' .
+					( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
+			case 'closed':
+				return 'Pull request #' . $number . ' {gh:closed}' .
+					( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
+			case 'removed':
+				return 'Pull request #' . $number . ' {gh:removed} from this task, it no longer references it:';
+			default:
+				return 'Pull request #' . $number . ' {gh:opened}' .
+					( strlen( $author ) ? ' by ' . $author : '' ) . ':';
+		}
+	}
+
+	public static function buildCommentBody( array $value ) {
+		return self::buildHeader( $value ) . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
 	}
 
 	public static function loadLinkURI( PhabricatorUser $viewer ) {
