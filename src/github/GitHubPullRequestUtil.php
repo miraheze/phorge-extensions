@@ -111,33 +111,35 @@ final class GitHubPullRequestUtil extends Phobject {
 			idx( $value, 'title', '' );
 	}
 
-	public static function buildHeader( array $value ) {
+	public static function buildCommentBody( array $value ) {
 		$actor = (string)idx( $value, 'actor', '' );
 		$author = (string)idx( $value, 'author', '' );
 		$number = (int)idx( $value, 'number', 0 );
 
 		if ( self::getKind( $value ) === self::KIND_COMMIT ) {
-			return 'Commit ' . self::getShortSha( $value['sha'] ) . ' {gh:pushed}' .
+			$head = 'Commit ' . self::getShortSha( $value['sha'] ) . ' {gh:pushed}' .
 				( strlen( $author ) ? ' by ' . $author : '' ) . ':';
+		} else {
+			switch ( idx( $value, 'state' ) ) {
+				case 'merged':
+					$head = 'Pull request #' . $number . ' {gh:merged}' .
+						( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
+					break;
+				case 'closed':
+					$head = 'Pull request #' . $number . ' {gh:closed}' .
+						( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
+					break;
+				case 'removed':
+					$head = 'Pull request #' . $number . ' {gh:removed} from this task, it no longer references it:';
+					break;
+				default:
+					$head = 'Pull request #' . $number . ' {gh:opened}' .
+						( strlen( $author ) ? ' by ' . $author : '' ) . ':';
+					break;
+			}
 		}
 
-		switch ( idx( $value, 'state' ) ) {
-			case 'merged':
-				return 'Pull request #' . $number . ' {gh:merged}' .
-					( strlen( $actor ) ? ' by ' . $actor : '' ) . ':';
-			case 'closed':
-				return 'Pull request #' . $number . ' {gh:closed}' .
-					( strlen( $actor ) ? ' by ' . $actor : '' ) . ' without merging:';
-			case 'removed':
-				return 'Pull request #' . $number . ' {gh:removed} from this task, it no longer references it:';
-			default:
-				return 'Pull request #' . $number . ' {gh:opened}' .
-					( strlen( $author ) ? ' by ' . $author : '' ) . ':';
-		}
-	}
-
-	public static function buildCommentBody( array $value ) {
-		return self::buildHeader( $value ) . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
+		return $head . "\n%%%" . self::buildSubjectLine( $value ) . "%%%\n" . self::getURI( $value );
 	}
 
 	public static function loadLinkURI( PhabricatorUser $viewer ) {
