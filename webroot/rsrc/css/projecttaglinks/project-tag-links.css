@@ -5,7 +5,7 @@
 .ptl {
   overflow: hidden;
   margin: 2px 0 4px;
-  border: 1px solid {$lightgreyborder};
+  border: 1px solid rgba({$alphablue}, 0.18);
   border-radius: 10px;
   font-size: 13px;
   line-height: 1.35;
@@ -34,23 +34,26 @@
   align-items: center;
   gap: 11px;
   padding: 9px 11px;
-  color: {$blacktext};
+  color: {$darkbluetext};
+  color: rgb(from {$blacktext} calc(18 + 237 * r / 255) calc(48 + 207 * r / 255) calc(63 + 192 * r / 255) / calc(1 - 0.1 * r / 255));
   text-decoration: none;
 }
 
 .ptl a.ptl-row + a.ptl-row {
-  border-top: 1px solid {$thinblueborder};
+  border-top: 1px solid rgba({$alphablue}, 0.08);
 }
 
 .ptl a.ptl-row:hover,
 .ptl a.ptl-row:focus {
-  background: {$hoverblue};
+  background: rgba({$alphablue}, 0.07);
   color: {$anchor};
+  color: rgb(from {$blacktext} calc(15 + 55 * r / 255) calc(98 + 80 * r / 255) calc(119 + 136 * r / 255));
   text-decoration: none;
 }
 
 .ptl a.ptl-row:focus-visible {
   outline: 2px solid {$anchor};
+  outline-color: rgb(from {$blacktext} calc(15 + 55 * r / 255) calc(98 + 80 * r / 255) calc(119 + 136 * r / 255));
   outline-offset: -2px;
 }
 
@@ -92,6 +95,7 @@
   margin-top: 1px;
   font-size: 12px;
   color: {$greytext};
+  color: rgb(from {$blacktext} calc(93 + 162 * r / 255) calc(112 + 143 * r / 255) calc(128 + 127 * r / 255) / calc(1 - 0.4 * r / 255));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
