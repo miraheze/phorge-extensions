@@ -1,11 +1,6 @@
 <?php
 
-// Copied from https://we.phorge.it/source/phorge/browse/master/src/infrastructure/markup/markuprule/PhutilRemarkupDocumentLinkRule.php
-
-/**
- * @license http://www.apache.org/licenses/ Apache License 2.0
- */
-final class MediaWikiLinksRemarkupRule extends PhutilRemarkupRule {
+final class MediaWikiLinkRemarkupRule extends PhutilRemarkupRule {
 
 	public function getPriority(): float {
 		// Set to 200.0 since Phriction is set to 175.0: https://we.phorge.it/source/phorge/browse/master/src/applications/phriction/markup/PhrictionRemarkupRule.php;b9ea6f1ce823dcd83a431f5913d9b1fe29dd25bd$8

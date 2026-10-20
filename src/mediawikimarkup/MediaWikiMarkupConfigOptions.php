@@ -1,17 +1,13 @@
 <?php
 
-/**
- * @license http://www.apache.org/licenses/ Apache License 2.0
- */
-final class MediaWikiLinksConfigOptions
-	extends PhabricatorApplicationConfigOptions {
+final class MediaWikiMarkupConfigOptions extends PhabricatorApplicationConfigOptions {
 
 	public function getName() {
-		return pht( 'MediaWiki Links' );
+		return pht( 'MediaWiki Markup' );
 	}
 
 	public function getDescription() {
-		return pht( 'Configure MediaWiki Links URLs.' );
+		return pht( 'Configure MediaWiki-style markup and link URLs.' );
 	}
 
 	public function getIcon() {
