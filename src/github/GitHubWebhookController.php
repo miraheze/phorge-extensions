@@ -107,10 +107,8 @@ final class GitHubWebhookController extends PhabricatorController {
 		$is_merged = (bool)idx( $pull, 'merged' );
 		$is_closed = idx( $pull, 'state' ) === 'closed';
 
-		// Pushes and edits are only useful for linking a task that is not linked yet.
-		if ( in_array( $action, [ 'synchronize', 'edited', 'ready_for_review' ], true ) && $is_closed ) {
-			return $this->newTextResponse( 200, 'ignored action' );
-		}
+		// Edits and pushes on a finished pull request can still rename it, but must not link new tasks or resolve any.
+		$existing_only = $is_closed && in_array( $action, [ 'synchronize', 'edited', 'ready_for_review' ], true );
 
 		[ $code, $commits ] = $this->fetchGitHub(
 			'/repos/' . $repository . '/pulls/' . $number . '/commits?per_page=100'
@@ -126,19 +124,17 @@ final class GitHubWebhookController extends PhabricatorController {
 			}
 		}
 
-		$merge_sha = (string)idx( $pull, 'merge_commit_sha', '' );
-		if ( $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ) {
-			[ $code, $merge_commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $merge_sha );
-			if ( is_array( $merge_commit ) && idx( $merge_commit, 'sha' ) === $merge_sha ) {
+		$merge_sha = '';
+		$candidate = (string)idxv( $payload, [ 'pull_request', 'merge_commit_sha' ], '' );
+		if ( $is_merged && GitHubPullRequestUtil::isValidSha( $candidate ) ) {
+			[ $code, $merge_commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $candidate );
+			if ( is_array( $merge_commit ) && idx( $merge_commit, 'sha' ) === $candidate ) {
+				$merge_sha = $candidate;
 				$corpus[] = (string)idxv( $merge_commit, [ 'commit', 'message' ], '' );
 			}
 		}
 
 		$references = GitHubPullRequestUtil::parseTaskReferences( implode( "\n\n", $corpus ) );
-		if ( !$references ) {
-			return $this->newTextResponse( 200, 'no task references' );
-		}
-
 		if ( $is_merged ) {
 			$state = 'merged';
 			$actor = idxv( $pull, [ 'merged_by', 'login' ] );
@@ -160,15 +156,40 @@ final class GitHubWebhookController extends PhabricatorController {
 			'author' => GitHubPullRequestUtil::isValidLogin( $author ) ? $author : '',
 			'actor' => GitHubPullRequestUtil::isValidLogin( $actor ) ? $actor : '',
 			'state' => $state,
-			'merge_sha' => $is_merged && GitHubPullRequestUtil::isValidSha( $merge_sha ) ? $merge_sha : '',
+			'merge_sha' => $merge_sha,
 		];
+
+		// A reference that disappears from a pull request that is still open unlinks the task.
+		// Truncated commit or reference lists could hide a reference, so those never unlink.
+		$removed = [ 0, 0 ];
+		if (
+			!$is_closed &&
+			count( $commits ) < 100 &&
+			count( $references ) < GitHubPullRequestUtil::MAX_TASKS
+		) {
+			$removed = $this->removeUnreferenced( $value, $references );
+		}
+
+		if ( !$references ) {
+			if ( !$removed[0] && !$removed[1] ) {
+				return $this->newTextResponse( 200, 'no task references' );
+			}
+			return $this->newResultResponse( $removed[0], $removed[1] );
+		}
 
 		$resolves = $state === 'merged' &&
 			idxv( $pull, [ 'base', 'ref' ] ) === idx( $base_repo, 'default_branch' );
 
-		$updated = $this->applyToTasks( $request, $references, $value, $resolves, idxv( $pull, [ 'user', 'id' ] ) );
+		[ $updated, $failed ] = $this->applyToTasks(
+			$request,
+			$references,
+			$value,
+			$resolves,
+			idxv( $pull, [ 'user', 'id' ] ),
+			$existing_only
+		);
 
-		return $this->newTextResponse( 200, 'updated ' . $updated );
+		return $this->newResultResponse( $updated + $removed[0], $failed + $removed[1] );
 	}
 
 	private function handlePush( AphrontRequest $request, array $payload, $repository ) {
@@ -211,6 +232,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		sleep( self::PUSH_SETTLE_SECONDS );
 
 		$updated = 0;
+		$failed = 0;
 		foreach ( array_slice( array_unique( $candidates ), 0, self::MAX_COMMITS ) as $sha ) {
 			[ $code, $commit ] = $this->fetchGitHub( '/repos/' . $repository . '/commits/' . $sha );
 			if ( !is_array( $commit ) || idx( $commit, 'sha' ) !== $sha ) {
@@ -225,7 +247,7 @@ final class GitHubWebhookController extends PhabricatorController {
 
 			$from_pull = false;
 			foreach ( $pulls as $pull ) {
-				if ( is_array( $pull ) && ( idx( $pull, 'merged_at' ) || idx( $pull, 'merge_commit_sha' ) === $sha ) ) {
+				if ( is_array( $pull ) && idx( $pull, 'merged_at' ) ) {
 					$from_pull = true;
 					break;
 				}
@@ -255,13 +277,22 @@ final class GitHubWebhookController extends PhabricatorController {
 				'state' => 'committed',
 			];
 
-			$updated += $this->applyToTasks( $request, $references, $value, true, idxv( $commit, [ 'author', 'id' ] ) );
+			[ $done, $bad ] = $this->applyToTasks( $request, $references, $value, true, idxv( $commit, [ 'author', 'id' ] ) );
+			$updated += $done;
+			$failed += $bad;
 		}
 
-		return $this->newTextResponse( 200, 'updated ' . $updated );
+		return $this->newResultResponse( $updated, $failed );
 	}
 
-	private function applyToTasks( AphrontRequest $request, array $references, array $value, $resolves, $github_id = null ) {
+	private function applyToTasks(
+		AphrontRequest $request,
+		array $references,
+		array $value,
+		$resolves,
+		$github_id = null,
+		$existing_only = false
+	) {
 		$viewer = PhabricatorUser::getOmnipotentUser();
 		$tasks = id( new ManiphestTaskQuery() )
 			->setViewer( $viewer )
@@ -275,11 +306,40 @@ final class GitHubWebhookController extends PhabricatorController {
 
 		$unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 		$updated = 0;
+		$failed = 0;
+		$is_pull = GitHubPullRequestUtil::getKind( $value ) === GitHubPullRequestUtil::KIND_PULL;
+		$source = PhabricatorContentSource::newFromRequest( $request );
 
 		foreach ( $tasks as $task ) {
 			$states = GitHubPullRequestUtil::loadLatestStates( $viewer, $task );
 			$last = idx( $states, $key );
+
+			if ( $existing_only && ( !$last || idx( $last, 'state' ) === 'removed' ) ) {
+				continue;
+			}
+
 			if ( $last && idx( $last, 'state' ) === $value['state'] ) {
+				// Same state with a new title or base branch, so only the stored row and posted comments change.
+				try {
+					$changed = false;
+					if ( $is_pull && $this->hasDescriptionChanged( $last, $value ) ) {
+						// Only the closing event names the merge commit, so later edits keep the stored one.
+						if ( $value['merge_sha'] === '' ) {
+							$value['merge_sha'] = (string)idx( $last, 'merge_sha', '' );
+						}
+						$this->applyTransactions( $task, $source, $acting_phid, [ $this->newStateTransaction( $value ) ] );
+						$changed = true;
+					}
+					if ( $is_pull && $bot_phid && $this->syncComments( $task, $source, $value, $bot_phid ) ) {
+						$changed = true;
+					}
+					if ( $changed ) {
+						$updated++;
+					}
+				} catch ( Throwable $ex ) {
+					$failed++;
+					phlog( $ex );
+				}
 				continue;
 			}
 
@@ -289,9 +349,7 @@ final class GitHubWebhookController extends PhabricatorController {
 
 			$xactions = [];
 
-			$xactions[] = id( new ManiphestTransaction() )
-				->setTransactionType( GitHubPullRequestTransaction::TRANSACTIONTYPE )
-				->setNewValue( $value );
+			$xactions[] = $this->newStateTransaction( $value );
 
 			if ( $bot_phid ) {
 				$xactions[] = id( new ManiphestTransaction() )
@@ -349,22 +407,202 @@ final class GitHubWebhookController extends PhabricatorController {
 			}
 
 			try {
-				$task->getApplicationTransactionEditor()
-					->setActor( $viewer )
-					->setActingAsPHID( $acting_phid )
-					->setContentSource( PhabricatorContentSource::newFromRequest( $request ) )
-					->setContinueOnNoEffect( true )
-					->setContinueOnMissingFields( true )
-					->applyTransactions( $task, $xactions );
+				$this->applyTransactions( $task, $source, $acting_phid, $xactions );
+				if ( $is_pull && $bot_phid ) {
+					$this->syncComments( $task, $source, $value, $bot_phid );
+				}
 				$updated++;
-			} catch ( Exception $ex ) {
+			} catch ( Throwable $ex ) {
+				$failed++;
 				phlog( $ex );
 			}
 		}
 
 		unset( $unguarded );
 
-		return $updated;
+		return [ $updated, $failed ];
+	}
+
+	private function newResultResponse( $updated, $failed ) {
+		// A failed save fails the delivery, so it can be found and redelivered from GitHub.
+		if ( $failed > 0 ) {
+			return $this->newTextResponse( 503, 'failed to save ' . $failed . ' task(s), updated ' . $updated );
+		}
+
+		return $this->newTextResponse( 200, 'updated ' . $updated );
+	}
+
+	private function newStateTransaction( array $value ) {
+		return id( new ManiphestTransaction() )
+			->setTransactionType( GitHubPullRequestTransaction::TRANSACTIONTYPE )
+			->setNewValue( $value );
+	}
+
+	private function hasDescriptionChanged( array $last, array $value ) {
+		return (string)idx( $last, 'title', '' ) !== (string)idx( $value, 'title', '' ) ||
+			(string)idx( $last, 'branch', '' ) !== (string)idx( $value, 'branch', '' );
+	}
+
+	private function applyTransactions( ManiphestTask $task, $source, $acting_phid, array $xactions ) {
+		$task->getApplicationTransactionEditor()
+			->setActor( PhabricatorUser::getOmnipotentUser() )
+			->setActingAsPHID( $acting_phid )
+			->setContentSource( $source )
+			->setContinueOnNoEffect( true )
+			->setContinueOnMissingFields( true )
+			->applyTransactions( $task, $xactions );
+	}
+
+	// Rewrites the subject line in the bot comments already posted for this pull request.
+	private function syncComments( ManiphestTask $task, $source, array $value, $bot_phid ) {
+		$uri = GitHubPullRequestUtil::getURI( $value );
+		$subject = '%%%' . GitHubPullRequestUtil::buildSubjectLine( $value ) . '%%%';
+		$pattern = '/\A(.*\n)%%%[^\n]*%%%(\n' . preg_quote( $uri, '/' ) . ')\z/s';
+
+		$xactions = id( new ManiphestTransactionQuery() )
+			->setViewer( PhabricatorUser::getOmnipotentUser() )
+			->withObjectPHIDs( [ $task->getPHID() ] )
+			->withTransactionTypes( [ PhabricatorTransactions::TYPE_COMMENT ] )
+			->withAuthorPHIDs( [ $bot_phid ] )
+			->execute();
+
+		$edited = false;
+		foreach ( $xactions as $xaction ) {
+			$comment = $xaction->getComment();
+			if ( !$comment || $comment->getIsRemoved() ) {
+				continue;
+			}
+
+			$content = (string)$comment->getContent();
+			if ( !preg_match( $pattern, $content, $matches ) ) {
+				continue;
+			}
+
+			$new_content = $matches[1] . $subject . $matches[2];
+			if ( $new_content === $content ) {
+				continue;
+			}
+
+			id( new PhabricatorApplicationTransactionCommentEditor() )
+				->setActor( PhabricatorUser::getOmnipotentUser() )
+				->setActingAsPHID( $comment->getAuthorPHID() )
+				->setContentSource( $source )
+				->setRequest( $this->getRequest() )
+				->setCancelURI( $task->getURI() )
+				->applyEdit(
+					$xaction,
+					$xaction->getApplicationTransactionCommentObject()->setContent( $new_content )
+				);
+
+			$edited = true;
+		}
+
+		return $edited;
+	}
+
+	/**
+	 * Marks the pull request as removed on tasks that track it but no longer have a reference to them.
+	 * Only meant for pull requests that are still open. Returns [ updated, failed ].
+	 */
+	private function removeUnreferenced( array $value, array $references ) {
+		$viewer = PhabricatorUser::getOmnipotentUser();
+		$key = GitHubPullRequestUtil::getStateKey( $value );
+
+		$xactions = id( new ManiphestTransactionQuery() )
+			->setViewer( $viewer )
+			->withTransactionTypes( [ GitHubPullRequestTransaction::TRANSACTIONTYPE ] )
+			->execute();
+
+		$latest = [];
+		foreach ( msort( $xactions, 'getID' ) as $xaction ) {
+			$stored = $xaction->getNewValue();
+			if (
+				is_array( $stored ) &&
+				GitHubPullRequestUtil::isValidValue( $stored ) &&
+				GitHubPullRequestUtil::getStateKey( $stored ) === $key
+			) {
+				$latest[$xaction->getObjectPHID()] = $stored;
+			}
+		}
+
+		$phids = [];
+		foreach ( $latest as $phid => $stored ) {
+			if ( idx( $stored, 'state' ) !== 'removed' ) {
+				$phids[] = $phid;
+			}
+		}
+
+		if ( !$phids ) {
+			return [ 0, 0 ];
+		}
+
+		$tasks = id( new ManiphestTaskQuery() )
+			->setViewer( $viewer )
+			->withPHIDs( $phids )
+			->execute();
+
+		$removed = $value;
+		$removed['state'] = 'removed';
+		$removed['actor'] = '';
+		$removed['merge_sha'] = '';
+
+		$bot_phid = $this->getBotPHID();
+		$tag_phid = $this->getTagPHID();
+		$acting_phid = $bot_phid ?: ( new GitHubIntegrationApplication() )->getPHID();
+		$source = PhabricatorContentSource::newFromRequest( $this->getRequest() );
+
+		$unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+		$updated = 0;
+		$failed = 0;
+
+		foreach ( $tasks as $task ) {
+			if ( array_key_exists( $task->getID(), $references ) ) {
+				continue;
+			}
+
+			try {
+				$xactions = [ $this->newStateTransaction( $removed ) ];
+
+				if ( $bot_phid ) {
+					$xactions[] = id( new ManiphestTransaction() )
+						->setTransactionType( PhabricatorTransactions::TYPE_COMMENT )
+						->attachComment(
+							id( new ManiphestTransactionComment() )
+								->setContent( GitHubPullRequestUtil::buildCommentBody( $removed ) )
+						);
+				}
+
+				if ( $tag_phid ) {
+					$states = GitHubPullRequestUtil::loadLatestStates( $viewer, $task );
+					$states[$key] = $removed;
+					$tagged = in_array(
+						$tag_phid,
+						PhabricatorEdgeQuery::loadDestinationPHIDs(
+							$task->getPHID(),
+							PhabricatorProjectObjectHasProjectEdgeType::EDGECONST
+						),
+						true
+					);
+
+					if ( $tagged && !GitHubPullRequestUtil::hasOpenPull( $states ) ) {
+						$xactions[] = id( new ManiphestTransaction() )
+							->setTransactionType( PhabricatorTransactions::TYPE_EDGE )
+							->setMetadataValue( 'edge:type', PhabricatorProjectObjectHasProjectEdgeType::EDGECONST )
+							->setNewValue( [ '-' => [ $tag_phid => $tag_phid ] ] );
+					}
+				}
+
+				$this->applyTransactions( $task, $source, $acting_phid, $xactions );
+				$updated++;
+			} catch ( Throwable $ex ) {
+				$failed++;
+				phlog( $ex );
+			}
+		}
+
+		unset( $unguarded );
+
+		return [ $updated, $failed ];
 	}
 
 	private function getAssignee( $github_id ) {
@@ -426,7 +664,7 @@ final class GitHubWebhookController extends PhabricatorController {
 		$future = id( new HTTPSFuture( 'https://api.github.com' . $path ) )
 			->setMethod( 'GET' )
 			->addHeader( 'Accept', 'application/vnd.github+json' )
-			->addHeader( 'X-GitHub-Api-Version', '2022-11-28' )
+			->addHeader( 'X-GitHub-Api-Version', '2026-03-10' )
 			->addHeader( 'User-Agent', 'WikiTide-Phorge' )
 			->setTimeout( 15 );
 

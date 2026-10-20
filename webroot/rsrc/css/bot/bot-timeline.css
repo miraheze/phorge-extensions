@@ -139,7 +139,7 @@
     filter: saturate(110%) hue-rotate(79deg) brightness(0.81);
   }
 
-  &:has(.transaction-comment .gh-state-closed) a.phui-timeline-image {
+  &:has(.transaction-comment :is(.gh-state-closed, .gh-state-removed)) a.phui-timeline-image {
     filter: grayscale(1) brightness(1.3);
   }
 

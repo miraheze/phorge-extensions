@@ -2,7 +2,7 @@
 
 final class GitHubStateRemarkupRule extends PhabricatorRemarkupCustomInlineRule {
 
-	public const STATES = [ 'opened', 'merged', 'closed', 'pushed' ];
+	public const STATES = [ 'opened', 'merged', 'closed', 'pushed', 'removed' ];
 
 	public function getPriority() {
 		return 1000.0;
