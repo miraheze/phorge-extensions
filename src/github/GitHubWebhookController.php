@@ -135,6 +135,9 @@ final class GitHubWebhookController extends PhabricatorController {
 		}
 
 		$references = GitHubPullRequestUtil::parseTaskReferences( implode( "\n\n", $corpus ) );
+
+		// The title and description can be edited, unlike commits, so they decide what stays linked.
+		$text_references = GitHubPullRequestUtil::parseTaskReferences( $corpus[0] . "\n\n" . $corpus[1] );
 		if ( $is_merged ) {
 			$state = 'merged';
 			$actor = idxv( $pull, [ 'merged_by', 'login' ] );
@@ -157,6 +160,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			'actor' => GitHubPullRequestUtil::isValidLogin( $actor ) ? $actor : '',
 			'state' => $state,
 			'merge_sha' => $merge_sha,
+			'text_refs' => array_keys( $text_references ),
 		];
 
 		// A reference that disappears from a pull request that is still open unlinks the task.
@@ -167,7 +171,7 @@ final class GitHubWebhookController extends PhabricatorController {
 			count( $commits ) < 100 &&
 			count( $references ) < GitHubPullRequestUtil::MAX_TASKS
 		) {
-			$removed = $this->removeUnreferenced( $value, $references );
+			$removed = $this->removeUnreferenced( $value, $references, $text_references );
 		}
 
 		if ( !$references ) {
@@ -186,7 +190,8 @@ final class GitHubWebhookController extends PhabricatorController {
 			$value,
 			$resolves,
 			idxv( $pull, [ 'user', 'id' ] ),
-			$existing_only
+			$existing_only,
+			$text_references
 		);
 
 		return $this->newResultResponse( $updated + $removed[0], $failed + $removed[1] );
@@ -291,7 +296,8 @@ final class GitHubWebhookController extends PhabricatorController {
 		array $value,
 		$resolves,
 		$github_id = null,
-		$existing_only = false
+		$existing_only = false,
+		$text_references = null
 	) {
 		$viewer = PhabricatorUser::getOmnipotentUser();
 		$tasks = id( new ManiphestTaskQuery() )
@@ -315,6 +321,17 @@ final class GitHubWebhookController extends PhabricatorController {
 			$last = idx( $states, $key );
 
 			if ( $existing_only && ( !$last || idx( $last, 'state' ) === 'removed' ) ) {
+				continue;
+			}
+
+			// A removed reference stays removed, even if a commit message still mentions the task.
+			if (
+				$is_pull &&
+				$text_references !== null &&
+				$last &&
+				idx( $last, 'state' ) === 'removed' &&
+				!array_key_exists( $task->getID(), $text_references )
+			) {
 				continue;
 			}
 
@@ -439,8 +456,16 @@ final class GitHubWebhookController extends PhabricatorController {
 	}
 
 	private function hasDescriptionChanged( array $last, array $value ) {
+		$old_refs = idx( $last, 'text_refs' );
+		$new_refs = (array)idx( $value, 'text_refs', [] );
+		if ( is_array( $old_refs ) ) {
+			sort( $old_refs );
+			sort( $new_refs );
+		}
+
 		return (string)idx( $last, 'title', '' ) !== (string)idx( $value, 'title', '' ) ||
-			(string)idx( $last, 'branch', '' ) !== (string)idx( $value, 'branch', '' );
+			(string)idx( $last, 'branch', '' ) !== (string)idx( $value, 'branch', '' ) ||
+			( is_array( $old_refs ) && $old_refs !== $new_refs );
 	}
 
 	private function applyTransactions( ManiphestTask $task, $source, $acting_phid, array $xactions ) {
@@ -502,9 +527,10 @@ final class GitHubWebhookController extends PhabricatorController {
 
 	/**
 	 * Marks the pull request as removed on tasks that track it but no longer have a reference to them.
-	 * Only meant for pull requests that are still open. Returns [ updated, failed ].
+	 * A task also counts as unreferenced when the title or description used to mention it and no longer does,
+	 * even if a commit message still does. Only meant for pull requests that are still open. Returns [ updated, failed ].
 	 */
-	private function removeUnreferenced( array $value, array $references ) {
+	private function removeUnreferenced( array $value, array $references, array $text_references ) {
 		$viewer = PhabricatorUser::getOmnipotentUser();
 		$key = GitHubPullRequestUtil::getStateKey( $value );
 
@@ -526,10 +552,20 @@ final class GitHubWebhookController extends PhabricatorController {
 		}
 
 		$phids = [];
+		$dropped = [];
 		foreach ( $latest as $phid => $stored ) {
-			if ( idx( $stored, 'state' ) !== 'removed' ) {
-				$phids[] = $phid;
+			if ( idx( $stored, 'state' ) === 'removed' ) {
+				continue;
 			}
+
+			$phids[] = $phid;
+
+			// Rows from before references were recorded only have the title to go by.
+			$before = idx( $stored, 'text_refs' );
+			if ( !is_array( $before ) ) {
+				$before = array_keys( GitHubPullRequestUtil::parseTaskReferences( (string)idx( $stored, 'title', '' ) ) );
+			}
+			$dropped[$phid] = array_diff( array_map( 'intval', $before ), array_keys( $text_references ) );
 		}
 
 		if ( !$phids ) {
@@ -556,7 +592,10 @@ final class GitHubWebhookController extends PhabricatorController {
 		$failed = 0;
 
 		foreach ( $tasks as $task ) {
-			if ( array_key_exists( $task->getID(), $references ) ) {
+			if (
+				array_key_exists( $task->getID(), $references ) &&
+				!in_array( (int)$task->getID(), $dropped[$task->getPHID()], true )
+			) {
 				continue;
 			}
 
