@@ -540,15 +540,26 @@ final class GitHubWebhookController extends PhabricatorController {
 			->execute();
 
 		$latest = [];
+		$history = [];
 		foreach ( msort( $xactions, 'getID' ) as $xaction ) {
 			$stored = $xaction->getNewValue();
 			if (
-				is_array( $stored ) &&
-				GitHubPullRequestUtil::isValidValue( $stored ) &&
-				GitHubPullRequestUtil::getStateKey( $stored ) === $key
+				!is_array( $stored ) ||
+				!GitHubPullRequestUtil::isValidValue( $stored ) ||
+				GitHubPullRequestUtil::getStateKey( $stored ) !== $key
 			) {
-				$latest[$xaction->getObjectPHID()] = $stored;
+				continue;
 			}
+
+			$phid = $xaction->getObjectPHID();
+			$latest[$phid] = $stored;
+			$mentioned = array_keys( GitHubPullRequestUtil::parseTaskReferences( (string)idx( $stored, 'title', '' ) ) );
+			$recorded = idx( $stored, 'text_refs' );
+			$history[$phid] = array_merge(
+				idx( $history, $phid, [] ),
+				$mentioned,
+				is_array( $recorded ) ? $recorded : []
+			);
 		}
 
 		$phids = [];
@@ -559,13 +570,10 @@ final class GitHubWebhookController extends PhabricatorController {
 			}
 
 			$phids[] = $phid;
-
-			// Rows from before references were recorded only have the title to go by.
-			$before = idx( $stored, 'text_refs' );
-			if ( !is_array( $before ) ) {
-				$before = array_keys( GitHubPullRequestUtil::parseTaskReferences( (string)idx( $stored, 'title', '' ) ) );
-			}
-			$dropped[$phid] = array_diff( array_map( 'intval', $before ), array_keys( $text_references ) );
+			$dropped[$phid] = array_diff(
+				array_unique( array_map( 'intval', $history[$phid] ) ),
+				array_keys( $text_references )
+			);
 		}
 
 		if ( !$phids ) {
