@@ -1,16 +1,13 @@
 <?php
 
-/**
- * @license http://www.apache.org/licenses/ Apache License 2.0
- */
-final class MediaWikiLinksApplication extends PhabricatorApplication {
+final class MediaWikiMarkupApplication extends PhabricatorApplication {
 
 	public function getName() {
-		return pht( 'MediaWiki Links' );
+		return pht( 'MediaWiki Markup' );
 	}
 
 	public function getShortDescription() {
-		return pht( 'Use Wikitext Links' );
+		return pht( 'Use Wikitext formatting and links' );
 	}
 
 	public function getIcon() {
@@ -27,7 +24,10 @@ final class MediaWikiLinksApplication extends PhabricatorApplication {
 
 	public function getRemarkupRules() {
 		return [
-			new MediaWikiLinksRemarkupRule(),
+			new MediaWikiNowikiRemarkupRule(),
+			new MediaWikiLinkRemarkupRule(),
+			new MediaWikiExternalLinkRemarkupRule(),
+			new MediaWikiFormatRemarkupRule(),
 		];
 	}
 }
